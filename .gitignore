@@ -1,0 +1,14 @@
+# Временные файлы офисных программ
+~$*
+.~lock.*#
+*.tmp
+*.bak
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Редакторы
+.idea/
+.vscode/
