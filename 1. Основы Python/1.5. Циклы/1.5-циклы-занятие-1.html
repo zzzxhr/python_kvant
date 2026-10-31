@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>1.5. Циклы. Занятие 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+
+/* ===== ЯДРО ШАБЛОНА: не менять. Projector-first: type scales with the screen (rem), high contrast, one meaning per colour.
+   green = rule/correct, red = trap/error, yellow = task/user input/star, blue = code/live coding. */
+html{font-size:clamp(14px, calc(.85vw + .55vh), 28px)}
+:root{
+  --bg:#06140F; --surface:#0E2219; --surface2:#143024; --fg:#F3FBF6; --muted:#BAD3C6; --line:#2B4C3D;
+  --accent:#3EE6A0; --accent-strong:#8DF5C8; --accent-soft:rgba(62,230,160,.13);
+  --blue:#6CC6FF; --blue-soft:rgba(108,198,255,.13);
+  --yellow:#FFD15C; --yellow-soft:rgba(255,209,92,.13);
+  --red:#FF7B7B; --red-soft:rgba(255,123,123,.13);
+  --purple:#C4A6FF; --purple-soft:rgba(196,166,255,.14);
+  --code-bg:#030C09; --code-head:#0A1A14; --code-line:#1B3A2D; --code-fg:#EAF6EF; --ln:#4D7465;
+  --kw:#5EF0B0; --bi:#7DD3FC; --str:#FFD866; --num:#FFAE6B; --com:#93B8A9; --fx:#FF9ED2;
+  --hero1:#0F6447; --hero2:#05291E;
+  --font-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#F5F3EC; --surface:#FFFFFF; --surface2:#EEF3EE; --fg:#0E1B15; --muted:#3F544A; --line:#C9D4CB;
+  --accent:#08784F; --accent-strong:#055C3C; --accent-soft:#DDF1E6;
+  --blue:#0B62A8; --blue-soft:#E1EEF9;
+  --yellow:#9A6200; --yellow-soft:#FBEFD3;
+  --red:#C12E2E; --red-soft:#FBE4E2;
+  --purple:#6A3FC9; --purple-soft:#EEE7FC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:1rem;line-height:1.5}
+.app{height:100%;display:flex;flex-direction:column;padding-inline:max(1rem,env(safe-area-inset-left,0px))}
+
+/* chrome — kept small so the slide gets the space */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:6px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:14px}
+.brand{font-family:var(--font-display);font-weight:700;font-size:13px;display:flex;align-items:center;gap:9px}
+.brand span{color:var(--accent)}
+.brand .logo{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#0F6447,#3EE6A0);display:grid;place-items:center;color:#fff;font:700 12px var(--font-mono)}
+.tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#jump,.ib{font:inherit;font-size:13px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 9px;cursor:pointer}
+#jump{max-width:min(320px,100%)}
+.ib:hover,#jump:hover{border-color:var(--accent)}
+main{flex:1;overflow-y:auto;padding-block:1.4rem 2.2rem}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:7px;border-top:1px solid var(--line);position:relative;font-size:14px}
+.bar{position:absolute;left:0;top:-2px;height:3px;background:var(--accent);transition:width .25s;border-radius:0 3px 3px 0}
+.nav .btn{font-size:14px;padding:7px 14px}
+.count{font-family:var(--font-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted)}
+@media (max-width:700px){.hint{display:none}}
+
+.btn{font:600 .85rem var(--font-body);background:var(--surface);color:var(--fg);border:1.5px solid var(--line);border-radius:10px;padding:.45em .95em;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:#03231A;border-color:transparent}
+:root[data-theme="light"] .btn.pri{color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* slide */
+.slide{max-width:1640px;margin:0 auto;display:flex;flex-direction:column;gap:1.1rem}
+.eyebrow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kind{display:inline-flex;align-items:center;gap:.35em;padding:.3em .7em;border-radius:999px;font-weight:700;letter-spacing:.06em;color:var(--accent);background:var(--accent-soft);border:1.5px solid currentColor}
+.kind.trap{color:var(--red);background:var(--red-soft)}
+.kind.prac{color:var(--yellow);background:var(--yellow-soft)}
+.kind.live{color:var(--blue);background:var(--blue-soft)}
+.kind.quiz{color:var(--purple);background:var(--purple-soft)}
+h1,h2,h3{margin:0}
+h1,h2{font-family:var(--font-display);font-weight:700;text-wrap:balance;line-height:1.12}
+h1{font-size:3.3rem}
+h2{font-size:2.15rem}
+.lead{font-size:1.2rem;color:var(--muted);max-width:62ch;margin:0}
+.lead b,.lead code{color:var(--fg)}
+.head{display:flex;flex-direction:column;gap:.5rem}
+p{margin:0}
+b,strong{font-weight:700}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+.two.w{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+@media (max-width:980px){.two,.two.w,.three{grid-template-columns:minmax(0,1fr)}.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.col{display:flex;flex-direction:column;gap:.85rem;min-width:0}
+
+/* code / output — always labelled so pupils never mix them up */
+.code,.con,.term{border-radius:14px;overflow:hidden;background:var(--code-bg);border:1.5px solid var(--code-line);min-width:0}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:.4rem .8rem;background:var(--code-head);border-bottom:1.5px solid var(--code-line);font:600 .7rem var(--font-mono);color:#A9C9BB}
+.lbl{display:inline-flex;align-items:center;gap:.5em}
+.lbl i{font-style:normal;font-weight:700;letter-spacing:.08em;padding:.15em .55em;border-radius:6px}
+.code .lbl i{background:#0E3756;color:#8ED3FF}
+.con .lbl i,.term .lbl i{background:#3A3010;color:#FFD866}
+.con.err{border-color:#5A2626}
+.con.err .lbl i{background:#4A1A1A;color:#FF9C9C}
+.con.err .out{white-space:pre-wrap;overflow-wrap:anywhere}
+.acts{display:flex;gap:6px}
+.mini{font:600 .66rem var(--font-mono);background:transparent;color:#A9C9BB;border:1px solid #2A4A3C;border-radius:7px;padding:.25em .7em;cursor:pointer}
+.mini:hover{border-color:#3EE6A0;color:#fff}
+.mini.run{background:#18855C;color:#fff;border-color:transparent;font-size:.75rem;padding:.3em .9em}
+pre{margin:0}
+pre.py{padding:.75rem 0;color:var(--code-fg);font:1rem/1.6 var(--font-mono);overflow-x:auto;counter-reset:ln}
+pre.py .ln{display:block;padding:0 1rem 0 2.6rem;position:relative;white-space:pre;min-height:1.6em}
+pre.py .ln::before{counter-increment:ln;content:counter(ln);position:absolute;left:0;width:1.8rem;text-align:right;color:var(--ln);font-size:.75em}
+pre.py.nonum .ln{padding-left:1rem}
+pre.py.nonum .ln::before{display:none}
+pre.py .ln.hl{background:rgba(62,230,160,.18);box-shadow:inset 4px 0 0 #3EE6A0}
+pre.py .ln.bad{background:rgba(255,100,100,.18);box-shadow:inset 4px 0 0 #FF6B6B}
+pre.py .ln.good{background:rgba(62,230,160,.16);box-shadow:inset 4px 0 0 #3EE6A0}
+.tk-kw{color:var(--kw);font-weight:700}.tk-bi{color:var(--bi)}.tk-str{color:var(--str)}.tk-com{color:var(--com);font-style:italic}.tk-num{color:var(--num)}.tk-fx{color:var(--fx);font-weight:700}
+.out{padding:.7rem 1rem;color:#F0F7F3;font:1rem/1.55 var(--font-mono);white-space:pre;overflow-x:auto;tab-size:8;min-height:2.6rem}
+.out .u{color:#1E1600;background:#FFD15C;border-radius:5px;padding:0 .3em;font-weight:700}
+.out .e{color:#FFB3B3}
+.out .eb{color:#FF7B7B;font-weight:700}
+.out .dim{color:#7FA696;font-style:italic}
+.out .hl6{color:#1E1600;background:#FFD15C;border-radius:4px;padding:0 .15em;font-weight:700}
+.legend{font-size:.85rem;color:var(--muted)}
+.legend .u{color:#1E1600;background:#FFD15C;border-radius:5px;padding:0 .3em;font-family:var(--font-mono);font-weight:700}
+
+.term .out{min-height:6rem;max-height:24rem;overflow-y:auto}
+.term input.tin{font:inherit;background:rgba(255,209,92,.12);border:0;border-bottom:2px solid #FFD15C;color:#FFD15C;outline:none;width:12ch;padding:0 .2em;font-weight:700}
+.term .fin,.term .ph{color:#6E9585;font-style:italic}
+
+/* text blocks */
+.notes{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:.9rem 1.15rem}
+.notes h3{margin:0 0 .45rem;font-size:1.02rem;font-weight:700}
+.notes ul,.notes ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.4rem}
+.notes li::marker{color:var(--accent);font-weight:700}
+.notes p+p{margin-top:.5rem}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--accent-soft);color:var(--accent-strong);padding:.05em .35em;border-radius:6px;white-space:nowrap}
+:root[data-theme="light"] code{color:var(--accent-strong)}
+.notes.warn{border-color:var(--red);background:var(--red-soft)}
+.notes.warn h3{color:var(--red)}
+.notes.tip{border-color:var(--accent);background:var(--accent-soft)}
+.notes.tip h3{color:var(--accent)}
+.key{display:flex;gap:1rem;align-items:center;border-radius:14px;padding:.95rem 1.2rem;background:var(--accent-soft);border:2px solid var(--accent);font-size:1.15rem;font-weight:600}
+.key::before{content:"Главное";flex:none;font:700 .68rem var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:#03231A;background:var(--accent);padding:.35em .65em;border-radius:7px}
+:root[data-theme="light"] .key::before{color:#fff}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:.95rem;display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.card .k{font:700 .7rem var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.card b.t{font-family:var(--font-display);font-weight:500;font-size:1.1rem}
+.card p{color:var(--muted)}
+.ptitle{font-family:var(--font-mono);font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.tag{align-self:flex-start;font:700 .75rem var(--font-body);padding:.3em .8em;border-radius:999px;border:1.5px solid currentColor}
+.tag.bad{color:var(--red);background:var(--red-soft)}.tag.good{color:var(--accent);background:var(--accent-soft)}
+.tag.bad::before{content:"✗ "}.tag.good::before{content:"✓ "}
+
+/* tables */
+.tbl{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.tbl table{width:100%;border-collapse:collapse;font-size:1rem}
+.tbl th{font:700 .68rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface2);text-align:left;padding:.55rem .9rem}
+.tbl td{padding:.55rem .9rem;border-top:1.5px solid var(--line);vertical-align:top}
+.tbl td.c,.tbl th.c{text-align:center}
+.tbl tr.on td{background:var(--accent-soft);box-shadow:inset 0 0 0 0 var(--accent)}
+.tbl tr.on td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
+.tbl tr.nl td{color:var(--muted);font-style:italic}
+
+/* reveal */
+details.ans{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+details.ans[open]{border-color:var(--purple)}
+details.ans>summary{list-style:none;cursor:pointer;padding:.75rem 1rem .75rem 3.1rem;position:relative;font-weight:600;font-size:1.05rem}
+details.ans>summary::-webkit-details-marker{display:none}
+details.ans>summary::before{content:"?";width:1.6rem;height:1.6rem;border-radius:8px;display:grid;place-items:center;background:var(--purple-soft);color:var(--purple);font:700 .95rem var(--font-mono);position:absolute;left:.9rem;top:.75rem}
+details.ans[open]>summary::before{content:"✓";background:var(--purple);color:#1A0F33}
+details.ans>summary .sm{font-weight:400;color:var(--muted);font-size:.85rem;margin-left:.5rem}
+details.ans>.body{padding:0 1.1rem 1rem 3.1rem;display:flex;flex-direction:column;gap:.75rem;font-size:1.02rem}
+details.sol{border-style:dashed}
+details.sol[open]{border-color:var(--yellow);border-style:solid}
+details.sol>summary::before{content:"✎";background:var(--yellow-soft);color:var(--yellow)}
+details.sol[open]>summary::before{content:"✎";background:var(--yellow);color:#1E1600}
+details.sol>.body{padding-left:1.1rem}
+.qs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:start}
+@media (max-width:980px){.qs{grid-template-columns:minmax(0,1fr)}}
+
+/* hero */
+.hero{background:radial-gradient(120% 140% at 0% 0%,var(--hero1),var(--hero2));color:#F2FBF6;border-radius:22px;padding:clamp(1.6rem,4vw,3.4rem);display:flex;flex-direction:column;gap:1.1rem;position:relative;overflow:hidden;min-height:62vh;justify-content:center}
+.hero::after{content:"";position:absolute;right:-4rem;top:-4rem;width:22rem;height:22rem;border-radius:50%;border:3rem solid rgba(255,255,255,.045)}
+.hero .eyebrow{color:#8DF5C8}
+.hero .lead{color:#CBE8DA;font-size:1.3rem}
+.hero .goals{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:1rem 1.3rem;max-width:46rem;font-size:1.1rem}
+.hero .goals h3{font-size:1.05rem;margin-bottom:.4rem}
+.hero .goals ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:.3rem}
+.hero .goals li::marker{color:#8DF5C8}
+.hero .meta{display:flex;gap:.6rem;flex-wrap:wrap}
+.hero .meta span{font:600 .8rem var(--font-mono);background:rgba(0,0,0,.25);border-radius:999px;padding:.35em .9em;color:#D8F2E6}
+.hero .num{font-family:var(--font-display);font-size:7rem;line-height:.9;color:rgba(141,245,200,.22);position:absolute;right:2.5rem;bottom:1.5rem;font-weight:700}
+
+/* practice */
+.task{border:2px solid var(--yellow);border-radius:14px;background:var(--surface);padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.6rem}
+.task .story{color:var(--muted);font-style:italic}
+.task ul{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.4rem}
+.task li::marker{color:var(--yellow);font-weight:700}
+.star{border:1.5px dashed var(--yellow);background:var(--yellow-soft);border-radius:14px;padding:.75rem 1rem}
+.star b{color:var(--yellow)}
+.stuck{font-size:.9rem;color:var(--muted)}
+.timer{display:inline-flex;align-items:center;gap:.5rem}
+.timer .tv{font:700 1.7rem var(--font-mono);font-variant-numeric:tabular-nums;color:var(--yellow);min-width:3.6ch}
+.timer.done .tv{color:var(--red)}
+.prow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* tabs */
+.tabs{display:flex;flex-direction:column;gap:.9rem}
+.tabbar{display:flex;gap:.5rem;flex-wrap:wrap}
+.tabbar button{font:600 .9rem var(--font-body);background:var(--surface);color:var(--muted);border:1.5px solid var(--line);border-radius:999px;padding:.4em 1em;cursor:pointer}
+.tabbar button.on{background:var(--accent);color:#03231A;border-color:transparent}
+:root[data-theme="light"] .tabbar button.on{color:#fff}
+
+/* widgets */
+.wg{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.wg .row,.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.wg label{color:var(--muted);display:flex;align-items:center;gap:.5rem}
+.wg input[type=range]{accent-color:var(--accent);width:9rem;height:1.2rem}
+.wg input[type=text]{font:1rem var(--font-mono);background:var(--bg);color:var(--fg);border:1.5px solid var(--line);border-radius:9px;padding:.3em .6em;width:10ch}
+.big{font:700 1.05rem var(--font-mono);color:var(--accent)}
+.vars{display:flex;gap:.7rem;flex-wrap:wrap}
+.var{background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:.45rem .9rem;font-family:var(--font-mono);min-width:5.5rem}
+.var span{display:block;font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.var b{font-size:1.7rem;color:var(--accent);line-height:1.15}
+.msg{font-size:1.08rem;min-height:1.5em;font-weight:500}
+.die{width:6.5rem;height:6.5rem;border-radius:1.3rem;background:#fff;box-shadow:0 6px 0 #B9C9C0,0 10px 24px rgba(0,0,0,.3);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:.95rem;gap:2px}
+.die i{width:1.05rem;height:1.05rem;border-radius:50%;background:#0F5C43;place-self:center;visibility:hidden}
+.die i.on{visibility:visible}
+.die.roll{animation:roll .45s ease-out}
+@keyframes roll{0%{transform:rotate(-25deg) scale(.85)}60%{transform:rotate(12deg) scale(1.05)}100%{transform:none}}
+.letter{width:6.5rem;height:6.5rem;border-radius:1.1rem;background:var(--accent-soft);border:3px solid var(--accent);display:grid;place-items:center;font:700 3.2rem var(--font-display);color:var(--accent)}
+.hist{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.6rem;align-items:end;height:12rem;padding-top:.6rem}
+.hist div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.25rem;height:100%}
+.hist .b{width:100%;background:var(--accent);border-radius:8px 8px 0 0;transition:height .3s;min-height:2px}
+.hist .v{font:600 .8rem var(--font-mono);color:var(--muted)}
+.hist .l{font:700 1rem var(--font-mono)}
+.week{display:grid;grid-template-columns:2.6rem repeat(4,minmax(0,1fr));gap:.4rem;font-size:.85rem}
+.week .d{font:700 .85rem var(--font-mono);color:var(--muted);display:flex;align-items:center}
+.week .c{background:var(--bg);border:1.5px solid var(--line);border-radius:9px;padding:.45rem .2rem;text-align:center;font-family:var(--font-mono);color:var(--muted);transition:background .15s}
+.week .c.done{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.week .c.cur{background:var(--accent);color:#03231A;font-weight:700;border-color:transparent}
+.week .d.cur{color:var(--accent)}
+.nest{border:2.5px solid var(--accent);border-radius:14px;padding:.8rem 1rem;display:flex;flex-direction:column;gap:.6rem;background:var(--accent-soft)}
+.nest .in2{border:2.5px dashed var(--blue);border-radius:12px;padding:.7rem .9rem;background:var(--surface)}
+.nest .lab{font:700 .8rem var(--font-mono);color:var(--accent)}
+.nest .in2 .lab{color:var(--blue)}
+.flow{display:flex;flex-direction:column;gap:.75rem}
+.path{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.path .st{background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:.4rem .75rem}
+.path .st.g{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:700}
+.path .st.r{border-color:var(--red);color:var(--red);background:var(--red-soft);font-weight:700;text-decoration:line-through}
+.path .ar{color:var(--muted);font-family:var(--font-mono);font-weight:700}
+.path .pl{font:700 .72rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:5.5rem}
+.bets{display:flex;gap:.4rem}
+.bets button.on{background:var(--accent);color:#03231A;border-color:transparent}
+.cmp{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1rem;align-items:center}
+@media (prefers-reduced-motion:no-preference){.slide.enter{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}}
+
+/* screenshot placeholder (работа в программах рисуется рамкой) */
+/* только для экрана / только для PDF */
+.onlyprint{display:none}
+.shot{border:2.5px dashed #8E9A94;border-radius:14px;min-height:11rem;display:grid;place-items:center;color:var(--muted);font-size:.95rem;text-align:center;padding:1rem;background:var(--surface)}
+/* tracer */
+.tracer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+@media (max-width:980px){.tracer{grid-template-columns:minmax(0,1fr)}}
+.result-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+@media (max-width:980px){.result-pair{grid-template-columns:minmax(0,1fr)}}
+.term .sample-note{color:#6E9585;font-style:italic}
+/* print / PDF для учеников: все слайды по одному на страницу, ответы и решения скрыты, подсказки открыты */
+@media print{
+  @page{size:338mm 190mm;margin:8mm}
+  html{font-size:10.5pt}
+  :root,:root[data-theme]{--bg:#FFFFFF;--surface:#FFFFFF;--surface2:#EEF3EE;--fg:#0E1B15;--muted:#3F544A;--line:#C9D4CB;--accent:#08784F;--accent-strong:#055C3C;--accent-soft:#DDF1E6;--blue:#0B62A8;--blue-soft:#E1EEF9;--yellow:#9A6200;--yellow-soft:#FBEFD3;--red:#C12E2E;--red-soft:#FBE4E2;--purple:#6A3FC9;--purple-soft:#EEE7FC}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body,.app{height:auto;background:#fff}
+  .top,.nav,.acts,.timer button,.tabbar,.tracer .row,.wg button,.wg input{display:none!important}
+  main{overflow:visible;padding:0;zoom:1!important}
+  main .slide,main .slide[hidden]{display:flex!important;break-after:page;page-break-after:always;animation:none!important;max-width:none}
+  .tab[hidden]{display:block!important}
+  .tab+.tab{margin-top:1rem}
+  details.sol{display:none!important}
+  .hero{min-height:auto}
+  .out,.term .out{max-height:none!important;overflow:visible;white-space:pre-wrap}
+  pre.py .ln{white-space:pre-wrap}
+  .wg label{display:none}
+  .noprint,.term .ph,.tracer .msg{display:none!important}
+  .onlyprint{display:block!important}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="logo">py</span>Python <span>· 1.5. Циклы. Занятие 1</span></div>
+    <div class="tools">
+      <select id="jump" aria-label="Перейти к слайду"></select>
+      <button class="ib" id="zm" type="button" title="Мельче">A−</button>
+      <button class="ib" id="zp" type="button" title="Крупнее">A+</button>
+      <button class="ib" id="theme" type="button" title="Светлая / тёмная тема">Тема</button>
+      <button class="ib" id="fs" type="button" title="Во весь экран (F)">⛶ Экран</button>
+      <button class="ib" id="pans" type="button" title="Печатать ли ответы на вопросы в PDF (Ctrl+P)">PDF: без ответов</button>
+    </div>
+  </header>
+  <main id="main">
+<!-- ===== СЛАЙДЫ: всё содержание занятия — только между этой меткой и </main> ===== -->
+<section class="slide" data-title="1.5. Циклы. Занятие 1">
+<div class="hero">
+<div class="eyebrow">Часть 1. Основы Python · Тема 1.5 · Занятие 1 из 2</div>
+<h1>1.5. Циклы. Занятие 1</h1>
+<div class="goals"><h3>К концу занятия ты сможешь:</h3><ul>
+<li>повторять команды циклом <b>while</b>, пока выполняется условие;</li>
+<li><b>считать и копить</b> в цикле: счётчик и накопитель;</li>
+<li>повторять нужное число раз через <b>for</b> и <b>range</b>, перебирать строку по символам;</li>
+<li>выходить из цикла через <b>break</b> и пропускать шаг через <b>continue</b>.</li>
+</ul></div>
+<div class="meta"><span>3 урока по 40 минут</span><span>мини-проект «Тренажёр таблицы умножения»</span></div>
+</div>
+</section>
+<section class="slide" data-title="Разминка">
+<div class="eyebrow"><span class="kind quiz">? Разминка</span> Начало · урок 1</div>
+<h2>Вспоминаем тему 1.4: условия</h2>
+<div class="two w">
+<div class="col">
+<details class="ans"><summary>1. Что выведет программа справа?</summary><div class="body"><script type="text/x-console">Зачёт</script><p>75 не больше 90, но больше 60 — срабатывает <code>elif</code>.</p></div></details>
+<details class="ans"><summary>2. Что она выведет, если <code>score = 60</code>?</summary><div class="body"><script type="text/x-console">Зачёт</script><p><code>&gt;=</code> — «больше <b>или равно</b>», поэтому 60 подходит.</p></div></details>
+<details class="ans"><summary>3. Что выведет <code>print(0 &lt; 10 &lt; 10)</code>? Почему?</summary><div class="body"><script type="text/x-console">False</script><p>Цепочка значит <code>0 &lt; 10 and 10 &lt; 10</code>. Вторая часть ложна — значит, всё ложно.</p></div></details>
+</div>
+<script type="text/x-python" data-file="main.py">
+score = 75
+if score >= 90:
+    print("Отлично")
+elif score >= 60:
+    print("Зачёт")
+else:
+    print("Ещё попытка")
+</script>
+</div>
+</section>
+<section class="slide" data-title="Что получится сегодня">
+<div class="eyebrow">Начало · урок 1</div>
+<h2>Вот что у тебя получится сегодня</h2>
+<p class="lead">Тренажёр таблицы умножения: задаёт примеры по порядку, <b>не отпускает, пока не ответишь верно</b>, и считает ошибки.</p>
+<div class="two w">
+<div class="term" data-prog="trainer" data-title="тренажёр"><script type="text/x-sample">Какое число тренируем? [[7]]
+7 * 1 = [[7]]
+Верно!
+7 * 2 = [[14]]
+Верно!
+7 * 3 = [[20]]
+Неверно, ещё раз: [[21]]
+Верно!
+7 * 4 = [[стоп]]
+Решено примеров: 3
+Ошибок: 1</script></div>
+<div class="col">
+<div class="notes"><h3>Чтобы его написать, не хватает:</h3><ol>
+<li>повторять вопрос, <b>пока</b> ответ неверный — блок 1;</li>
+<li>задать <b>ровно 10</b> примеров по порядку — блок 2;</li>
+<li><b>выйти раньше</b> по слову «стоп» — блок 3.</li></ol></div>
+<p class="legend"><span class="u">Так</span> выделено то, что ввёл пользователь.</p>
+</div>
+</div>
+</section>
+<section class="slide" data-title="План занятия">
+<div class="eyebrow">Начало · урок 1</div>
+<h2>План занятия</h2>
+<div class="three">
+<div class="card"><span class="k">Урок 1 · 40 мин</span><b class="t">Цикл while</b><p>Повторять, пока условие верно; считать и копить в цикле</p><p>Практика: «Копилка на цель»</p></div>
+<div class="card"><span class="k">Урок 2 · 40 мин</span><b class="t">Цикл for и range</b><p>Повторять нужное число раз; перебирать строку по символам</p><p>Практика: «Анализ пароля»</p></div>
+<div class="card"><span class="k">Урок 3 · 40 мин</span><b class="t">break и continue</b><p>Выходить из цикла раньше и пропускать шаги</p><p>Практика: «Кассовый чек» · мини-проект «Тренажёр таблицы умножения»</p></div>
+</div>
+<div class="notes"><h3>Цвета в презентации</h3>
+<div class="row" style="gap:.6rem 1.2rem"><span class="kind">Правило</span><span class="kind trap">! Ловушка</span><span class="kind prac">✎ Практика</span><span class="kind live">›_ Живой кодинг</span><span class="kind quiz">? Вопросы</span></div></div>
+</section>
+<section class="slide" data-title="Вспомним: += и сравнения">
+<div class="eyebrow">Вспомним · темы 1.3 и 1.4</div>
+<h2>Вспомним: изменить переменную и сравнить</h2>
+<div class="tbl"><table>
+<tr><th>Запись</th><th>Что делает</th><th>Пример</th></tr>
+<tr><td><code>score += 10</code></td><td>увеличивает на 10</td><td>было 5 → стало 15</td></tr>
+<tr><td><code>lives -= 1</code></td><td>уменьшает на 1</td><td>было 3 → стало 2</td></tr>
+<tr><td><code>count &gt; 0</code></td><td>больше ли нуля?</td><td>при 2 → True, при 0 → False</td></tr>
+<tr><td><code>guess != "dragon"</code></td><td>не равно ли?</td><td>при "cat" → True</td></tr>
+<tr><td><code>n % 3 == 0</code></td><td>делится ли на 3 без остатка?</td><td>при 9 → True, при 10 → False</td></tr>
+</table></div>
+<div class="key">Эти записи сегодня будут почти в каждом цикле.</div>
+</section>
+<section class="slide" data-title="Блок 1 · Цикл while">
+<div class="hero">
+<div class="eyebrow">Урок 1</div>
+<h1>Блок 1 из 3.<br>Цикл while</h1>
+<p class="lead">В этом блоке ты научишься повторять команды, пока выполняется условие, считать попытки и копить сумму в цикле.</p>
+<div class="num">01</div>
+</div>
+</section>
+<section class="slide" data-title="Что такое цикл и зачем">
+<div class="eyebrow">Блок 1 · Цикл while</div>
+<h2>Что такое цикл и зачем он нужен</h2>
+<p class="lead"><b>Цикл</b> — повторение одних и тех же команд. Как на стадионе: «пока не пробежал 5 кругов — беги ещё круг».</p>
+<div class="two">
+<div class="col"><span class="tag bad">Без цикла: строка на каждый круг</span>
+<script type="text/x-python" data-file="main.py">
+print("Круг 1")
+print("Круг 2")
+print("Круг 3")
+print("Круг 4")
+print("Круг 5")
+</script></div>
+<div class="col"><span class="tag good">С циклом: 4 строки на любое число кругов</span>
+<script type="text/x-python" data-file="main.py">
+lap = 1
+while lap <= 5:
+    print(f"Круг {lap}")
+    lap += 1
+</script>
+<script type="text/x-console" data-title="у обеих программ">Круг 1
+Круг 2
+Круг 3
+Круг 4
+Круг 5</script></div>
+</div>
+<div class="key">Цикл повторяет команды за нас: для 100 кругов меняем одно число, а не пишем 100 строк.</div>
+</section>
+<section class="slide" data-title="Как записывается while">
+<div class="eyebrow">Блок 1 · Цикл while</div>
+<h2>Как записывается while</h2>
+<script type="text/x-python" data-file="шаблон" data-nonum>
+while условие:         # проверяется перед каждым кругом
+    команда 1          # тело цикла: отступ 4 пробела
+    команда 2
+команда после цикла    # без отступа: после выхода
+</script>
+<div class="three">
+<div class="card"><span class="k">while</span><p>«пока»: повторяй, пока условие верно</p></div>
+<div class="card"><span class="k">условие:</span><p>как в <code>if</code> (тема 1.4): True — ещё круг, False — выход из цикла</p></div>
+<div class="card"><span class="k">тело цикла</span><p>команды с отступом 4 пробела — они и повторяются</p></div>
+</div>
+<div class="key">while проверяет условие перед каждым кругом и повторяет тело, пока условие True.</div>
+</section>
+<section class="slide" data-title="Пример: обратный отсчёт">
+<div class="eyebrow">Блок 1 · Цикл while</div>
+<h2>Пример: обратный отсчёт</h2>
+<div class="two">
+<div class="col">
+<script type="text/x-python" data-file="main.py" data-hl="2">
+count = 5
+while count > 0:
+    print(count)
+    count -= 1
+print("Старт!")
+</script>
+<script type="text/x-console">5
+4
+3
+2
+1
+Старт!</script>
+</div>
+<div class="notes"><h3>Разбор</h3><ul>
+<li>Строка 1 — <code>count = 5</code>: с этого числа начинаем.</li>
+<li>Строка 2 — перед каждым кругом проверяем <code>count &gt; 0</code>.</li>
+<li>Строки 3–4 — тело: печатаем и уменьшаем на 1.</li>
+<li>Когда <code>count</code> стал 0, условие False — выполняется строка 5.</li>
+</ul></div>
+</div>
+<div class="key">Внутри цикла что-то должно меняться, чтобы условие однажды стало False.</div>
+</section>
+<section class="slide" data-title="По шагам: обратный отсчёт">
+<div class="eyebrow"><span class="kind live">›_ По шагам</span> Блок 1 · Цикл while</div>
+<h2>По шагам: обратный отсчёт</h2>
+<p class="lead noprint">Жми «Шаг →» и следи за <code>count</code> и выделенной строкой.</p>
+<div class="tracer">
+<script type="text/x-trace-code" data-file="main.py">
+count = 3
+while count > 0:
+    print(count)
+    count -= 1
+print("Старт!")
+</script>
+<script type="application/json">{"vars": ["count"], "steps": [{"l": 1, "v": {"count": "3"}, "m": "Создаём count = 3"}, {"l": 2, "v": {"count": "3"}, "m": "Проверяем count > 0 (count = 3) → True: заходим в тело"}, {"l": 3, "v": {"count": "3"}, "m": "Печатаем: 3", "o": "3\n", "t": "печать 3"}, {"l": 4, "v": {"count": "2"}, "m": "count: уменьшаем на 1, теперь 2"}, {"l": 2, "v": {"count": "2"}, "m": "Проверяем count > 0 (count = 2) → True: заходим в тело"}, {"l": 3, "v": {"count": "2"}, "m": "Печатаем: 2", "o": "2\n", "t": "печать 2"}, {"l": 4, "v": {"count": "1"}, "m": "count: уменьшаем на 1, теперь 1"}, {"l": 2, "v": {"count": "1"}, "m": "Проверяем count > 0 (count = 1) → True: заходим в тело"}, {"l": 3, "v": {"count": "1"}, "m": "Печатаем: 1", "o": "1\n", "t": "печать 1"}, {"l": 4, "v": {"count": "0"}, "m": "count: уменьшаем на 1, теперь 0"}, {"l": 2, "v": {"count": "0"}, "m": "Проверяем count > 0 (count = 0) → False: выходим из цикла"}, {"l": 5, "v": {"count": "0"}, "m": "Печатаем: Старт!", "o": "Старт!\n", "t": "печать Старт!"}, {"l": 0, "v": {"count": "0"}, "m": "Программа закончилась"}]}</script>
+</div>
+<div class="key">Условие проверяется 4 раза, а тело выполняется 3 раза: последняя проверка выводит из цикла.</div>
+</section>
+<section class="slide" data-title="Счётчик">
+<div class="eyebrow">Блок 1 · Цикл while</div>
+<h2>Счётчик: сколько было попыток</h2>
+<p class="lead"><b>Счётчик</b> — переменная, которая считает, сколько раз что-то случилось.</p>
+<div class="two">
+<div class="col">
+<script type="text/x-python" data-file="main.py" data-hl="5">
+PASSWORD = "dragon"
+tries = 1
+guess = input("Пароль: ")
+while guess != PASSWORD:
+    tries += 1
+    guess = input("Неверно. Пароль: ")
+print("Доступ открыт")
+print(f"Попыток: {tries}")
+</script>
+<div class="notes"><ul>
+<li><code>tries = 1</code> — первую попытку делаем ещё до цикла.</li>
+<li><code>tries += 1</code> — каждая новая попытка.</li>
+<li><code>!=</code> — «не равно»: повторяем, пока пароль неверный.</li>
+</ul></div>
+</div>
+<div class="term" data-prog="password" data-title="main.py"><script type="text/x-sample">Пароль: [[cat]]
+Неверно. Пароль: [[dog12]]
+Неверно. Пароль: [[dragon]]
+Доступ открыт
+Попыток: 3</script></div>
+</div>
+<div class="key">Счётчик: начальное значение до цикла, внутри цикла — tries += 1.</div>
+</section>
+<section class="slide" data-title="Накопитель">
+<div class="eyebrow">Блок 1 · Цикл while</div>
+<h2>Накопитель: копим сумму</h2>
+<p class="lead"><b>Накопитель</b> — переменная, в которую на каждом круге добавляем значение. Как копилка.</p>
+<div class="two">
+<div class="col">
+<script type="text/x-python" data-file="main.py" data-hl="5">
+total = 0
+day = 1
+while day <= 3:
+    steps = int(input(f"Шагов в день {day}: "))
+    total += steps
+    day += 1
+print(f"Всего шагов: {total}")
+</script>
+<script type="text/x-console">Шагов в день 1: [[5000]]
+Шагов в день 2: [[7200]]
+Шагов в день 3: [[3800]]
+Всего шагов: 16000</script>
+</div>
+<div class="notes"><h3>Разбор</h3><ul>
+<li><code>total = 0</code> — до цикла: копилка пустая.</li>
+<li><code>total += steps</code> — добавили шаги этого дня.</li>
+<li><code>day</code> — счётчик дней: цикл идёт 3 круга.</li>
+</ul></div>
+</div>
+<div class="key">Счётчик прибавляет 1, накопитель — само значение. Оба создаются до цикла.</div>
+</section>
+<section class="slide" data-title="Ловушка: бесконечный цикл">
+<div class="eyebrow"><span class="kind trap">! Ловушка</span> Блок 1 · Цикл while</div>
+<h2>Бесконечный цикл</h2>
+<div class="two">
+<div class="col"><span class="tag bad">Забыли изменить count</span>
+<script type="text/x-python" data-file="main.py" data-bad="2,3">
+count = 5
+while count > 0:
+    print(count)
+print("Старт!")
+</script>
+<script type="text/x-console" data-title="первые строки — и так без конца">5
+5
+5
+5</script>
+<div class="notes warn"><h3>Почему</h3><p><code>count</code> всегда 5, условие <code>count &gt; 0</code> всегда True. Как правильно: в теле меняй <code>count</code> — <code>count -= 1</code>.</p></div>
+</div>
+<div class="col">
+<div class="notes"><h3>Как остановить зависшую программу</h3><ol>
+<li><b>VS Code:</b> щёлкни в терминал и нажми <b>Ctrl+C</b>.</li>
+<li><b>Thonny:</b> красная кнопка <b>«Стоп»</b>.</li></ol></div>
+<div class="shot">Место для скриншота: терминал VS Code и кнопка «Стоп» в Thonny</div>
+<script type="text/x-console" data-title="после Ctrl+C" data-kind="error">Traceback (most recent call last):
+  File "/tmp/lesson/main.py", line 3, in <module>
+    print(count)
+    ~~~~~^^^^^^^
+KeyboardInterrupt</script>
+<p class="legend"><code>KeyboardInterrupt</code> — «прервано с клавиатуры»: программу остановил ты.</p>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Ловушка: накопитель в цикле">
+<div class="eyebrow"><span class="kind trap">! Ловушка</span> Блок 1 · Цикл while</div>
+<h2>Накопитель обнуляется на каждом круге</h2>
+<div class="two">
+<div class="col"><span class="tag bad">total = 0 внутри цикла</span>
+<script type="text/x-python" data-file="main.py" data-bad="3">
+day = 1
+while day <= 3:
+    total = 0
+    steps = int(input(f"Шагов в день {day}: "))
+    total += steps
+    day += 1
+print(f"Всего шагов: {total}")
+</script>
+<script type="text/x-console">Шагов в день 1: [[5000]]
+Шагов в день 2: [[7200]]
+Шагов в день 3: [[3800]]
+Всего шагов: 3800</script></div>
+<div class="col"><span class="tag good">total = 0 до цикла</span>
+<script type="text/x-python" data-file="main.py" data-good="1">
+total = 0
+day = 1
+while day <= 3:
+    steps = int(input(f"Шагов в день {day}: "))
+    total += steps
+    day += 1
+print(f"Всего шагов: {total}")
+</script>
+<script type="text/x-console">Шагов в день 1: [[5000]]
+Шагов в день 2: [[7200]]
+Шагов в день 3: [[3800]]
+Всего шагов: 16000</script></div>
+</div>
+<div class="notes warn"><h3>Почему</h3><p>Строка 3 каждый круг опустошает копилку, и остаются шаги только последнего дня. Начальное значение — <b>до цикла</b>.</p></div>
+</section>
+<section class="slide" data-title="Живой кодинг: план отжиманий">
+<div class="eyebrow"><span class="kind live">›_ Живой кодинг</span> Блок 1</div>
+<h2>Пишем вместе: план отжиманий</h2>
+<p class="lead">Каждый день отжимаешься на 5 раз больше. На какой день дойдёшь до 100 и сколько отжиманий сделаешь всего?</p>
+<div class="two">
+<div class="notes"><ol>
+<li>Спрашиваем, сколько отжиманий сейчас: <code>pushups</code>.</li>
+<li>Счётчик <code>day = 1</code>, цикл <code>while pushups &lt; 100</code>: каждый круг +1 день и +5 отжиманий. Запускаем.</li>
+<li>Добавляем накопитель <code>total</code> — всего за все дни.</li>
+<li>Проверяем границу: ввести 100 — цикл не выполнится ни разу.</li>
+<li>Не то — ищем причину по выводу, а не наугад.</li>
+</ol></div>
+<div class="col"><span class="ptitle">Что должно получиться</span>
+<script type="text/x-console">Сколько отжиманий сейчас? [[70]]
+День 7, отжиманий: 100
+Всего отжиманий: 595</script>
+<script type="text/x-console" data-title="если ввести 100">Сколько отжиманий сейчас? [[100]]
+День 1, отжиманий: 100
+Всего отжиманий: 100</script>
+<details class="ans sol"><summary>Итоговый код <span class="sm">открыть после живого кодинга</span></summary><div class="body"><script type="text/x-python" data-file="main.py">
+pushups = int(input("Сколько отжиманий сейчас? "))
+day = 1
+total = pushups
+while pushups < 100:
+    day += 1
+    pushups += 5
+    total += pushups
+print(f"День {day}, отжиманий: {pushups}")
+print(f"Всего отжиманий: {total}")
+</script></div></details>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Проверь себя: while (1)">
+<div class="eyebrow"><span class="kind quiz">? Проверь себя</span> Блок 1 · Цикл while</div>
+<h2>Проверь себя: while</h2>
+<div class="two w">
+<div class="col">
+<details class="ans"><summary>1. Что выведет программа справа? Сколько раз выполнится тело?</summary><div class="body"><script type="text/x-console">1
+4
+7</script><p>3 раза: n = 1, 4, 7. При n = 10 условие <code>n &lt; 10</code> ложно.</p></div></details>
+<details class="ans"><summary>2. Что будет, если поменять <code>n &lt; 10</code> на <code>n &lt;= 10</code>?</summary><div class="body"><script type="text/x-console">1
+4
+7
+10</script><p>Теперь 10 подходит: <code>&lt;=</code> — «меньше или равно».</p></div></details>
+</div>
+<script type="text/x-python" data-file="main.py">
+n = 1
+while n < 10:
+    print(n)
+    n += 3
+</script>
+</div>
+</section>
+<section class="slide" data-title="Проверь себя: while (2)">
+<div class="eyebrow"><span class="kind quiz">? Проверь себя</span> Блок 1 · Цикл while</div>
+<h2>Проверь себя: while</h2>
+<div class="two w">
+<div class="col">
+<details class="ans"><summary>3. Почему программа A зависает? Как починить?</summary><div class="body"><script type="text/x-console" data-title="первые строки — и так без конца">Жизней: 3
+Жизней: 4
+Жизней: 5
+Жизней: 6</script><p><code>lives</code> растёт, поэтому <code>lives &gt; 0</code> всегда True. Нужно уменьшать: <code>lives -= 1</code>.</p></div></details>
+<details class="ans"><summary>4. Сколько раз программа B выведет «Отдыхаем»?</summary><div class="body"><script type="text/x-console">Готов!</script><p>Ни разу: 0 &gt; 100 — False уже при первой проверке, тело пропускается.</p></div></details>
+<details class="ans"><summary>5. Почему <code>total = 0</code> пишут до цикла, а не внутри?</summary><div class="body"><p>Внутри цикла копилка обнулялась бы на каждом круге, и осталось бы только последнее значение.</p></div></details>
+</div>
+<div class="col">
+<script type="text/x-python" data-file="программа A">
+lives = 3
+while lives > 0:
+    print(f"Жизней: {lives}")
+    lives += 1
+</script>
+<script type="text/x-python" data-file="программа B">
+energy = 0
+while energy > 100:
+    print("Отдыхаем")
+print("Готов!")
+</script>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Практика: копилка — задание">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Блок 1 · 12 минут</div><div class="timer" data-min="12"></div></div>
+<h2>Задание: «Копилка на цель»</h2>
+<div class="two">
+<div class="task"><p class="story">Копишь на наушники — пусть программа считает дни.</p><ul><li>Спрашивает: «Сколько стоит цель? » — целое число больше 0.</li><li>Каждый день спрашивает: «День 1. Сколько отложил? », «День 2. …» — пока накопленное <b>меньше цели</b>.</li><li>В конце выводит: «Цель достигнута!», «Дней: …», «Накоплено: …».</li></ul></div>
+<div class="col">
+<div class="notes tip"><h3>Подсказка</h3><p>Нужны счётчик дней и накопитель суммы — оба до цикла. Условие цикла: «пока накоплено меньше цели».</p></div>
+<div class="star"><b>★ Успел раньше?</b> Выведи ещё, сколько получилось сверх цели: «Сверх цели: 100».</div>
+</div>
+</div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Практика: копилка — результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Блок 1</div>
+<h2>Что должно получиться</h2>
+<div class="two w">
+<script type="text/x-console" data-title="пример работы">Сколько стоит цель? [[2000]]
+День 1. Сколько отложил? [[500]]
+День 2. Сколько отложил? [[700]]
+День 3. Сколько отложил? [[300]]
+День 4. Сколько отложил? [[600]]
+Цель достигнута!
+Дней: 4
+Накоплено: 2100</script>
+<div class="notes"><h3>Проверь себя</h3><ul>
+<li>Цель 500 и в первый день 500 — «Дней: 1», «Накоплено: 500».</li>
+<li>«Накоплено» — сумма <b>всех</b> введённых чисел.</li>
+<li>Ввели 0 — день засчитан, программа спрашивает дальше.</li>
+<li>Ошибка — читай traceback снизу вверх, а не меняй код наугад.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="★★ Бумага до Луны">
+<div class="eyebrow"><span class="kind prac">★★ Для сильных</span> Блок 1</div>
+<h2>★★ «Бумага до Луны»</h2>
+<div class="two">
+<div class="col">
+<div class="task"><ul>
+<li>Лист бумаги толщиной <b>0,1 мм</b>. Каждое сложение пополам <b>удваивает</b> толщину.</li>
+<li>Сколько сложений нужно, чтобы толщина стала не меньше расстояния до Луны — <b>384 400 км</b>?</li>
+<li>Выведи число сложений и итоговую толщину в километрах.</li>
+</ul><p>Над чем подумать: почему ответ такой маленький?</p></div>
+<details class="ans tipd"><summary>Подсказка</summary><div class="body"><p>Переведи всё в одинаковые единицы — например, в десятые доли миллиметра. Что меняется на каждом круге и до какого момента крутить цикл?</p></div></details>
+</div>
+<div class="col"><span class="ptitle">Пример результата</span>
+<script type="text/x-console">Сложений: 42
+Толщина: 439804 км</script></div>
+</div>
+</section>
+<section class="slide" data-title="Блок 2 · for и range">
+<div class="hero">
+<div class="eyebrow">Урок 2</div>
+<h1>Блок 2 из 3.<br>Цикл for и range</h1>
+<p class="lead">В этом блоке ты научишься повторять команды нужное число раз и перебирать строку по символам.</p>
+<div class="num">02</div>
+</div>
+</section>
+<section class="slide" data-title="Что такое for и зачем">
+<div class="eyebrow">Блок 2 · Цикл for и range</div>
+<h2>Что такое for и зачем он нужен</h2>
+<p class="lead"><b>for</b> — цикл «для каждого»: переменная по очереди получает каждое значение из набора. Как учитель, который идёт по журналу по порядку.</p>
+<div class="two">
+<div class="col"><span class="tag bad">while: счётчик ведём сами</span>
+<script type="text/x-python" data-file="main.py">
+lap = 1
+while lap <= 5:
+    print(f"Круг {lap}")
+    lap += 1
+</script></div>
+<div class="col"><span class="tag good">for: счётчик меняется сам</span>
+<script type="text/x-python" data-file="main.py">
+for lap in range(1, 6):
+    print(f"Круг {lap}")
+</script>
+<script type="text/x-console" data-title="у обеих программ">Круг 1
+Круг 2
+Круг 3
+Круг 4
+Круг 5</script>
+<p class="legend"><code>range(1, 6)</code> — числа 1, 2, 3, 4, 5. Подробно — через слайд.</p></div>
+</div>
+<div class="key">Когда известно, сколько раз повторять, for короче и не даёт забыть увеличить счётчик.</div>
+</section>
+<section class="slide" data-title="Как записывается for">
+<div class="eyebrow">Блок 2 · Цикл for и range</div>
+<h2>Как записывается for</h2>
+<script type="text/x-python" data-file="шаблон" data-nonum>
+for имя in range(5):   # имя по очереди: 0, 1, 2, 3, 4
+    команда            # тело цикла: отступ 4 пробела
+команда после цикла    # без отступа: после цикла
+</script>
+<div class="three">
+<div class="card"><span class="k">for имя</span><p>переменная цикла: на каждом круге в ней новое значение</p></div>
+<div class="card"><span class="k">in range(...):</span><p>откуда брать значения: <code>range</code> даёт числа по порядку</p></div>
+<div class="card"><span class="k">тело цикла</span><p>команды с отступом — выполняются для каждого значения</p></div>
+</div>
+<div class="key">for сам перебирает значения: увеличивать счётчик вручную не нужно.</div>
+</section>
+<section class="slide" data-title="Три формы range">
+<div class="eyebrow">Блок 2 · Цикл for и range</div>
+<h2>Три формы range</h2>
+<p class="lead"><code>range(start, stop, step)</code> — числа от <b>start</b> до <b>stop</b> с шагом <b>step</b>. <b>stop не входит.</b></p>
+<div class="tabs">
+<div class="tabbar"></div>
+<div class="tab" data-tab="range(5)"><div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py">
+for i in range(5):
+    print(i, end=" ")
+</script>
+<script type="text/x-console">0 1 2 3 4</script></div>
+<div class="notes"><p>Одно число — это <b>stop</b>. Начало 0, шаг 1: ровно 5 кругов.</p></div></div></div>
+<div class="tab" data-tab="range(1, 6)"><div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py">
+for i in range(1, 6):
+    print(i, end=" ")
+</script>
+<script type="text/x-console">1 2 3 4 5</script></div>
+<div class="notes"><p><b>start</b> = 1, <b>stop</b> = 6. Само 6 не входит.</p></div></div></div>
+<div class="tab" data-tab="range(0, 20, 5)"><div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py">
+for i in range(0, 20, 5):
+    print(i, end=" ")
+</script>
+<script type="text/x-console">0 5 10 15</script></div>
+<div class="notes"><p><b>step</b> = 5: каждое следующее на 5 больше. 20 не входит.</p></div></div></div>
+<div class="tab" data-tab="range(10, 0, -2)"><div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py">
+for i in range(10, 0, -2):
+    print(i, end=" ")
+</script>
+<script type="text/x-console">10 8 6 4 2</script></div>
+<div class="notes"><p>Отрицательный шаг — счёт назад. Тогда start больше stop.</p></div></div></div>
+</div>
+<p class="legend"><code>print(i, end=" ")</code> — печать в одну строку через пробел (тема 1.2).</p>
+<div class="key">range(start, stop, step): start входит, stop — никогда.</div>
+</section>
+<section class="slide" data-title="Исследуй range">
+<div class="eyebrow">Блок 2 · Цикл for и range</div>
+<h2>Исследуй range</h2>
+<p class="lead">Какие числа получатся? Когда <code>range</code> пустой?</p>
+<div class="two">
+<div class="wg">
+<div class="row"><label>start <input type="range" id="rg-a" min="-10" max="20" value="1"></label><b class="big" id="rg-av">1</b></div>
+<div class="row"><label>stop <input type="range" id="rg-b" min="-10" max="20" value="10"></label><b class="big" id="rg-bv">10</b></div>
+<div class="row"><label>step <input type="range" id="rg-c" min="-5" max="5" value="2"></label><b class="big" id="rg-cv">2</b></div>
+<p class="legend noprint">Двигай ползунки и смотри на код и вывод справа.</p>
+</div>
+<div class="col">
+<div class="code"><div class="ch"><span class="lbl"><i>КОД</i> main.py</span></div><pre class="py" id="rg-pre"></pre></div>
+<div class="con"><div class="ch"><span class="lbl"><i>ВЫВОД</i></span></div><div class="out" id="rg-out">1 3 5 7 9</div></div>
+<div class="vars"><div class="var"><span>кругов</span><b id="rg-n">5</b></div></div>
+</div>
+</div>
+<div class="key">Если шагом не дойти от start к stop, range пустой — цикл не выполнится ни разу.</div>
+</section>
+<section class="slide" data-title="Ловушка: range не включает stop">
+<div class="eyebrow"><span class="kind trap">! Ловушка</span> Блок 2 · Цикл for и range</div>
+<h2>range(1, 10) не включает 10</h2>
+<p class="lead">Нужно вывести уровни игры с 1 по 10.</p>
+<div class="two">
+<div class="col"><span class="tag bad">Уровня 10 нет</span>
+<script type="text/x-python" data-file="main.py" data-bad="2">
+print("Уровни:", end=" ")
+for level in range(1, 10):
+    print(level, end=" ")
+</script>
+<script type="text/x-console">Уровни: 1 2 3 4 5 6 7 8 9</script></div>
+<div class="col"><span class="tag good">Все 10 уровней</span>
+<script type="text/x-python" data-file="main.py" data-good="2">
+print("Уровни:", end=" ")
+for level in range(1, 11):
+    print(level, end=" ")
+</script>
+<script type="text/x-console">Уровни: 1 2 3 4 5 6 7 8 9 10</script></div>
+</div>
+<div class="notes warn"><h3>Почему</h3><p><b>stop не входит</b> в range. Чтобы дойти до N включительно, пиши <code>range(1, N + 1)</code>.</p></div>
+</section>
+<section class="slide" data-title="Перебор строки по символам">
+<div class="eyebrow">Блок 2 · Цикл for и range</div>
+<h2>Перебор строки по символам</h2>
+<p class="lead"><b>Строка</b> — цепочка символов. for берёт их по одному, слева направо.</p>
+<div class="two">
+<div class="col">
+<script type="text/x-python" data-file="main.py" data-hl="2">
+nickname = "Shadow"
+for letter in nickname:
+    print(letter)
+</script>
+<script type="text/x-console">S
+h
+a
+d
+o
+w</script>
+</div>
+<div class="notes"><h3>Разбор</h3><ul>
+<li><code>letter</code> по очереди: <code>"S"</code>, <code>"h"</code>, <code>"a"</code> … <code>"w"</code>.</li>
+<li>Кругов столько, сколько символов в строке.</li>
+<li>Пробел, цифра, знак — тоже символы.</li>
+<li>Подробно про строки — в теме 2.1.</li>
+</ul></div>
+</div>
+<div class="key">for по строке перебирает все символы по порядку — пробелы тоже.</div>
+</section>
+<section class="slide" data-title="По шагам: буквы «о»">
+<div class="eyebrow"><span class="kind live">›_ По шагам</span> Блок 2 · Цикл for и range</div>
+<h2>По шагам: сколько букв «о» в слове</h2>
+<div class="tracer">
+<script type="text/x-trace-code" data-file="main.py">
+word = "молоко"
+count = 0
+for letter in word:
+    if letter == "о":
+        count += 1
+print(f"Букв «о»: {count}")
+</script>
+<script type="application/json">{"vars": ["letter", "count"], "steps": [{"l": 1, "v": {}, "m": "Создаём word = \"молоко\""}, {"l": 2, "v": {"count": "0"}, "m": "Создаём count = 0"}, {"l": 3, "v": {"letter": "\"м\"", "count": "0"}, "m": "Новый круг: letter = \"м\""}, {"l": 4, "v": {"letter": "\"м\"", "count": "0"}, "m": "Проверяем letter == \"о\" (letter = \"м\") → False"}, {"l": 3, "v": {"letter": "\"о\"", "count": "0"}, "m": "Новый круг: letter = \"о\""}, {"l": 4, "v": {"letter": "\"о\"", "count": "0"}, "m": "Проверяем letter == \"о\" (letter = \"о\") → True"}, {"l": 5, "v": {"letter": "\"о\"", "count": "1"}, "m": "count: увеличиваем на 1, теперь 1"}, {"l": 3, "v": {"letter": "\"л\"", "count": "1"}, "m": "Новый круг: letter = \"л\""}, {"l": 4, "v": {"letter": "\"л\"", "count": "1"}, "m": "Проверяем letter == \"о\" (letter = \"л\") → False"}, {"l": 3, "v": {"letter": "\"о\"", "count": "1"}, "m": "Новый круг: letter = \"о\""}, {"l": 4, "v": {"letter": "\"о\"", "count": "1"}, "m": "Проверяем letter == \"о\" (letter = \"о\") → True"}, {"l": 5, "v": {"letter": "\"о\"", "count": "2"}, "m": "count: увеличиваем на 1, теперь 2"}, {"l": 3, "v": {"letter": "\"к\"", "count": "2"}, "m": "Новый круг: letter = \"к\""}, {"l": 4, "v": {"letter": "\"к\"", "count": "2"}, "m": "Проверяем letter == \"о\" (letter = \"к\") → False"}, {"l": 3, "v": {"letter": "\"о\"", "count": "2"}, "m": "Новый круг: letter = \"о\""}, {"l": 4, "v": {"letter": "\"о\"", "count": "2"}, "m": "Проверяем letter == \"о\" (letter = \"о\") → True"}, {"l": 5, "v": {"letter": "\"о\"", "count": "3"}, "m": "count: увеличиваем на 1, теперь 3"}, {"l": 3, "v": {"letter": "\"о\"", "count": "3"}, "m": "Значения кончились — цикл закончился"}, {"l": 6, "v": {"letter": "\"о\"", "count": "3"}, "m": "Печатаем: Букв «о»: 3", "o": "Букв «о»: 3\n", "t": "печать Букв «о»: 3"}, {"l": 0, "v": {"letter": "\"о\"", "count": "3"}, "m": "Программа закончилась"}]}</script>
+</div>
+<div class="key">Счётчик внутри for: проверяем каждый символ и прибавляем 1, когда условие верно.</div>
+</section>
+<section class="slide" data-title="for или while">
+<div class="eyebrow">Блок 2 · Цикл for и range</div>
+<h2>for или while?</h2>
+<div class="tbl"><table>
+<tr><th></th><th>for</th><th>while</th></tr>
+<tr><td><b>Когда</b></td><td>знаем, сколько раз, или перебираем строку</td><td>повторяем, «пока…»: сколько раз — заранее неизвестно</td></tr>
+<tr><td><b>Пример</b></td><td>10 примеров таблицы умножения; буквы ника</td><td>спрашивать пароль, пока не угадан; копить до цели</td></tr>
+<tr><td><b>Счётчик</b></td><td>меняется сам</td><td>меняем сами — забыли, и цикл бесконечный</td></tr>
+</table></div>
+<div class="key">Знаешь число повторов или перебираешь строку — for. Повторяешь «пока…» — while.</div>
+</section>
+<section class="slide" data-title="Живой кодинг: таблица температур">
+<div class="eyebrow"><span class="kind live">›_ Живой кодинг</span> Блок 2</div>
+<h2>Пишем вместе: таблица температур</h2>
+<p class="lead">Утилита для поездки: перевод градусов Цельсия в Фаренгейты от −20 до 40 через каждые 10.</p>
+<div class="two">
+<div class="notes"><ol>
+<li>Цикл <code>for celsius in range(-20, 41, 10)</code> — пока просто печатаем <code>celsius</code>. Запускаем.</li>
+<li>Вопрос классу: почему stop = 41, а не 40?</li>
+<li>Формула: <code>fahrenheit = celsius * 9 / 5 + 32</code>.</li>
+<li>Печатаем строку таблицы через f-строку.</li>
+<li>Не то — ищем причину по выводу, а не наугад.</li>
+</ol></div>
+<div class="col"><span class="ptitle">Что должно получиться</span>
+<script type="text/x-console">-20 °C = -4.0 °F
+-10 °C = 14.0 °F
+0 °C = 32.0 °F
+10 °C = 50.0 °F
+20 °C = 68.0 °F
+30 °C = 86.0 °F
+40 °C = 104.0 °F</script>
+<details class="ans sol"><summary>Итоговый код <span class="sm">открыть после живого кодинга</span></summary><div class="body"><script type="text/x-python" data-file="main.py">
+for celsius in range(-20, 41, 10):
+    fahrenheit = celsius * 9 / 5 + 32
+    print(f"{celsius} °C = {fahrenheit} °F")
+</script></div></details>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Проверь себя: for (1)">
+<div class="eyebrow"><span class="kind quiz">? Проверь себя</span> Блок 2 · Цикл for и range</div>
+<h2>Проверь себя: for и range</h2>
+<div class="two w">
+<div class="col">
+<details class="ans"><summary>1. Что выведет программа A?</summary><div class="body"><script type="text/x-console">2 5 8</script><p>Начинаем с 2, шаг 3: 2, 5, 8. Следующее было бы 11, но stop = 11 не входит.</p></div></details>
+<details class="ans"><summary>2. Сколько раз выполнится тело в программе B?</summary><div class="body"><script type="text/x-console">Конец</script><p>Ни разу: от 5 до 5 чисел нет, <code>range(5, 5)</code> пустой.</p></div></details>
+<details class="ans"><summary>3. Найди ошибку в программе C.</summary><div class="body"><p>Печатает числа <b>от 0 до 99</b>: range начинается с 0, а 100 не входит. Правильно: <code>range(1, 101)</code>.</p></div></details>
+</div>
+<div class="col">
+<script type="text/x-python" data-file="программа A">
+for i in range(2, 11, 3):
+    print(i, end=" ")
+</script>
+<script type="text/x-python" data-file="программа B">
+for i in range(5, 5):
+    print("Привет")
+print("Конец")
+</script>
+<script type="text/x-python" data-file="программа C">
+# Нужно вывести числа от 1 до 100
+for n in range(100):
+    print(n)
+</script>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Проверь себя: for (2)">
+<div class="eyebrow"><span class="kind quiz">? Проверь себя</span> Блок 2 · Цикл for и range</div>
+<h2>Проверь себя: for по строке</h2>
+<div class="two w">
+<div class="col">
+<details class="ans"><summary>4. Что выведет программа справа?</summary><div class="body"><script type="text/x-console">8</script><p>8 символов: О, й, запятая, пробел, у, р, а, восклицательный знак.</p></div></details>
+<details class="ans"><summary>5. Почему в for нельзя «забыть увеличить счётчик», как в while?</summary><div class="body"><p>for сам берёт следующее значение из range или строки. В while мы меняем переменную своей строкой — её можно забыть.</p></div></details>
+</div>
+<script type="text/x-python" data-file="main.py">
+count = 0
+for symbol in "Ой, ура!":
+    count += 1
+print(count)
+</script>
+</div>
+</section>
+<section class="slide" data-title="Практика: пароль — задание">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Блок 2 · 12 минут</div><div class="timer" data-min="12"></div></div>
+<h2>Задание: «Анализ пароля»</h2>
+<div class="two">
+<div class="task"><p class="story">Проверяем, из чего состоит пароль.</p><ul><li>Спрашивает: «Придумай пароль: ».</li><li>Выводит: «Символов: …» и «Цифр: …».</li><li>Символы считай в цикле, без <code>len</code> (его ещё не проходили).</li></ul></div>
+<div class="col">
+<div class="notes tip"><h3>Подсказка</h3><p>Нужны два счётчика и <code>for</code> по строке. <code>symbol.isdigit()</code> — True, если символ — цифра (тема 1.2).</p></div>
+<div class="star"><b>★ Успел раньше?</b> Выведи ещё «Надёжный», если символов не меньше 8 и цифр не меньше 2, иначе «Слабый».</div>
+</div>
+</div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Практика: пароль — результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Блок 2</div>
+<h2>Что должно получиться</h2>
+<div class="two w">
+<script type="text/x-console" data-title="пример работы">Придумай пароль: [[dragon2024]]
+Символов: 10
+Цифр: 4</script>
+<div class="notes"><h3>Проверь себя</h3><ul>
+<li>Пароль <code>abc</code> — «Символов: 3», «Цифр: 0».</li>
+<li>Пароль <code>my cat 7</code> — «Символов: 8»: пробелы тоже символы.</li>
+<li>Объясни соседу каждую строку своего кода.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="★★ Ник наоборот">
+<div class="eyebrow"><span class="kind prac">★★ Для сильных</span> Блок 2</div>
+<h2>★★ «Ник наоборот»</h2>
+<div class="two">
+<div class="col">
+<div class="task"><ul>
+<li>Спрашивает: «Ник: ».</li>
+<li>Выводит ник задом наперёд: «Наоборот: …».</li>
+<li>Без срезов и готовых функций — только цикл <code>for</code> по строке.</li>
+</ul><p>Над чем подумать: как собрать новую строку по одной букве?</p></div>
+<details class="ans tipd"><summary>Подсказка</summary><div class="body"><p>Начни с пустой строки <code>""</code>. Строки склеиваются через <code>+</code>. Куда приклеивать очередную букву — в конец или в начало?</p></div></details>
+</div>
+<div class="col"><span class="ptitle">Пример результата</span>
+<script type="text/x-console">Ник: [[Shadow_Fox]]
+Наоборот: xoF_wodahS</script></div>
+</div>
+</section>
+<section class="slide" data-title="Блок 3 · break и continue">
+<div class="hero">
+<div class="eyebrow">Урок 3</div>
+<h1>Блок 3 из 3.<br>break и continue</h1>
+<p class="lead">В этом блоке ты научишься выходить из цикла раньше времени и пропускать ненужные шаги.</p>
+<div class="num">03</div>
+</div>
+</section>
+<section class="slide" data-title="break: выйти из цикла">
+<div class="eyebrow">Блок 3 · break и continue</div>
+<h2>break: выйти из цикла раньше</h2>
+<p class="lead"><b>break</b> — сразу выйти из цикла. Как с ключами: нашёл в первом кармане — остальные не проверяешь.</p>
+<div class="two">
+<div class="col">
+<script type="text/x-python" data-file="main.py" data-hl="5">
+password = "abc7d9"
+for symbol in password:
+    if symbol.isdigit():
+        print(f"Первая цифра: {symbol}")
+        break
+    print(f"Проверил: {symbol}")
+</script>
+<script type="text/x-console">Проверил: a
+Проверил: b
+Проверил: c
+Первая цифра: 7</script>
+</div>
+<div class="notes"><h3>Зачем и как работает</h3><ul>
+<li>Цифра уже найдена — искать дальше незачем.</li>
+<li>Строка 5 — <code>break</code>: цикл закончился, строка 6 не выполнилась.</li>
+<li>До символа <code>"9"</code> цикл так и не дошёл.</li>
+</ul></div>
+</div>
+<div class="key">break сразу заканчивает цикл: оставшиеся строки тела и круги не выполняются.</div>
+</section>
+<section class="slide" data-title="continue: пропустить шаг">
+<div class="eyebrow">Блок 3 · break и continue</div>
+<h2>continue: пропустить шаг</h2>
+<p class="lead"><b>continue</b> — пропустить остаток тела и перейти к следующему кругу. Как пустую страницу в тетради: пролистываешь и смотришь дальше.</p>
+<div class="two">
+<div class="col">
+<script type="text/x-python" data-file="main.py" data-hl="4">
+nickname = "lazy_cat_99"
+for symbol in nickname:
+    if symbol == "_":
+        continue
+    print(symbol, end="")
+</script>
+<script type="text/x-console">lazycat99</script>
+</div>
+<div class="notes"><h3>Зачем и как работает</h3><ul>
+<li>Убираем лишнее, не останавливая цикл.</li>
+<li>Символ <code>"_"</code> — <code>continue</code>, и <code>print</code> для него не выполняется.</li>
+<li><code>end=""</code> — печать подряд, без пробела (тема 1.2).</li>
+</ul></div>
+</div>
+<div class="key">continue пропускает только текущий круг, цикл идёт дальше. break выходит из цикла совсем.</div>
+</section>
+<section class="slide" data-title="По шагам: break и continue">
+<div class="eyebrow"><span class="kind live">›_ По шагам</span> Блок 3 · break и continue</div>
+<h2>По шагам: break и continue вместе</h2>
+<div class="tracer">
+<script type="text/x-trace-code" data-file="main.py">
+for n in range(1, 10):
+    if n % 2 == 0:
+        continue
+    if n > 5:
+        break
+    print(n)
+print("Готово")
+</script>
+<script type="application/json">{"vars": ["n"], "steps": [{"l": 1, "v": {"n": "1"}, "m": "Новый круг: n = 1"}, {"l": 2, "v": {"n": "1"}, "m": "Проверяем n % 2 == 0 (n = 1) → False"}, {"l": 4, "v": {"n": "1"}, "m": "Проверяем n > 5 (n = 1) → False"}, {"l": 6, "v": {"n": "1"}, "m": "Печатаем: 1", "o": "1\n", "t": "печать 1"}, {"l": 1, "v": {"n": "2"}, "m": "Новый круг: n = 2"}, {"l": 2, "v": {"n": "2"}, "m": "Проверяем n % 2 == 0 (n = 2) → True"}, {"l": 3, "v": {"n": "2"}, "m": "continue — пропускаем остаток тела, к следующему кругу"}, {"l": 1, "v": {"n": "3"}, "m": "Новый круг: n = 3"}, {"l": 2, "v": {"n": "3"}, "m": "Проверяем n % 2 == 0 (n = 3) → False"}, {"l": 4, "v": {"n": "3"}, "m": "Проверяем n > 5 (n = 3) → False"}, {"l": 6, "v": {"n": "3"}, "m": "Печатаем: 3", "o": "3\n", "t": "печать 3"}, {"l": 1, "v": {"n": "4"}, "m": "Новый круг: n = 4"}, {"l": 2, "v": {"n": "4"}, "m": "Проверяем n % 2 == 0 (n = 4) → True"}, {"l": 3, "v": {"n": "4"}, "m": "continue — пропускаем остаток тела, к следующему кругу"}, {"l": 1, "v": {"n": "5"}, "m": "Новый круг: n = 5"}, {"l": 2, "v": {"n": "5"}, "m": "Проверяем n % 2 == 0 (n = 5) → False"}, {"l": 4, "v": {"n": "5"}, "m": "Проверяем n > 5 (n = 5) → False"}, {"l": 6, "v": {"n": "5"}, "m": "Печатаем: 5", "o": "5\n", "t": "печать 5"}, {"l": 1, "v": {"n": "6"}, "m": "Новый круг: n = 6"}, {"l": 2, "v": {"n": "6"}, "m": "Проверяем n % 2 == 0 (n = 6) → True"}, {"l": 3, "v": {"n": "6"}, "m": "continue — пропускаем остаток тела, к следующему кругу"}, {"l": 1, "v": {"n": "7"}, "m": "Новый круг: n = 7"}, {"l": 2, "v": {"n": "7"}, "m": "Проверяем n % 2 == 0 (n = 7) → False"}, {"l": 4, "v": {"n": "7"}, "m": "Проверяем n > 5 (n = 7) → True"}, {"l": 5, "v": {"n": "7"}, "m": "break — сразу выходим из цикла"}, {"l": 7, "v": {"n": "7"}, "m": "Печатаем: Готово", "o": "Готово\n", "t": "печать Готово"}, {"l": 0, "v": {"n": "7"}, "m": "Программа закончилась"}]}</script>
+</div>
+<div class="key">continue вернул нас к for при n = 2, 4, 6, а break при n = 7 закончил цикл.</div>
+</section>
+<section class="slide" data-title="Ловушка: continue в while">
+<div class="eyebrow"><span class="kind trap">! Ловушка</span> Блок 3 · break и continue</div>
+<h2>continue в while — и программа зависла</h2>
+<p class="lead">Нужно вывести числа от 1 до 10, кроме кратных 3.</p>
+<div class="two">
+<div class="col"><span class="tag bad">Зависает</span>
+<script type="text/x-python" data-file="main.py" data-bad="4">
+n = 1
+while n <= 10:
+    if n % 3 == 0:
+        continue
+    print(n, end=" ")
+    n += 1
+</script>
+<script type="text/x-console" data-title="вывод — и дальше тишина">1 2</script></div>
+<div class="col"><span class="tag good">Работает</span>
+<script type="text/x-python" data-file="main.py" data-good="3">
+n = 0
+while n < 10:
+    n += 1
+    if n % 3 == 0:
+        continue
+    print(n, end=" ")
+</script>
+<script type="text/x-console">1 2 4 5 7 8 10</script></div>
+</div>
+<div class="notes warn"><h3>Почему</h3><p>При n = 3 <code>continue</code> перескакивает через <code>n += 1</code>: n навсегда 3, цикл бесконечный (останавливай Ctrl+C). <b>В while меняй переменную до continue.</b></p></div>
+</section>
+<section class="slide" data-title="Проверь себя: break и continue">
+<div class="eyebrow"><span class="kind quiz">? Проверь себя</span> Блок 3 · break и continue</div>
+<h2>Проверь себя: break и continue</h2>
+<div class="two w">
+<div class="col">
+<details class="ans"><summary>1. Что выведет программа A?</summary><div class="body"><script type="text/x-console">к</script><p>На букве «о» сработал break — до «т» цикл не дошёл.</p></div></details>
+<details class="ans"><summary>2. А если заменить <code>break</code> на <code>continue</code>?</summary><div class="body"><script type="text/x-console">к
+т</script><p>Пропускается только «о», цикл идёт дальше.</p></div></details>
+<details class="ans"><summary>3. Что изменится в программе B, если убрать <code>continue</code>?</summary><div class="body"><script type="text/x-console">0
+1
+2</script><p>Ничего: continue стоит в конце тела, пропускать уже нечего.</p></div></details>
+</div>
+<div class="col">
+<script type="text/x-python" data-file="программа A">
+for letter in "кот":
+    if letter == "о":
+        break
+    print(letter)
+</script>
+<script type="text/x-python" data-file="программа B">
+for i in range(3):
+    print(i)
+    continue
+</script>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Практика: чек — задание">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Блок 3 · 6 минут</div><div class="timer" data-min="6"></div></div>
+<h2>Задание: «Кассовый чек»</h2>
+<div class="two">
+<div class="task"><p class="story">Касса на 5 покупок, которая не принимает ерунду.</p><ul><li>5 раз спрашивает: «Цена покупки 1: », «Цена покупки 2: » …</li><li>Ввели <b>0</b> — покупки кончились: больше не спрашивает.</li><li>Ввели <b>отрицательное</b> — пишет «Цена не может быть меньше 0» и спрашивает следующую покупку.</li><li>В конце: «Итого: …» — сумма правильных цен.</li></ul></div>
+<div class="col">
+<div class="notes tip"><h3>Подсказка</h3><p><code>for</code> по номерам покупок от 1 до 5 и накопитель. Ноль — <code>break</code>, отрицательная цена — <code>continue</code>.</p></div>
+<div class="star"><b>★ Успел раньше?</b> Выведи ещё, сколько покупок в чеке: «Покупок: 2» — без нуля и отрицательных.</div>
+</div>
+</div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Практика: чек — результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Блок 3</div>
+<h2>Что должно получиться</h2>
+<div class="two w">
+<div class="term" data-prog="receipt" data-title="пример работы"><script type="text/x-sample">Цена покупки 1: [[350]]
+Цена покупки 2: [[-20]]
+Цена не может быть меньше 0
+Цена покупки 3: [[400]]
+Цена покупки 4: [[0]]
+Итого: 750</script></div>
+<div class="notes"><h3>Проверь себя</h3><ul>
+<li>Сразу ввести 0 — «Итого: 0».</li>
+<li>Отрицательная цена не попадает в сумму.</li>
+<li>Пять обычных цен — программа спрашивает ровно 5 раз.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="★★ Сейф">
+<div class="eyebrow"><span class="kind prac">★★ Для сильных</span> Блок 3</div>
+<h2>★★ «Сейф: 3 попытки»</h2>
+<div class="two">
+<div class="col">
+<div class="task"><ul>
+<li>Код сейфа — <b>4071</b>. Программа даёт 3 попытки: «Попытка 1: » …</li>
+<li>Угадал — «Сейф открыт!», больше не спрашивает.</li>
+<li>Неверно — «Неверно». После трёх промахов — «Сейф заблокирован».</li>
+</ul><p>Над чем подумать: после цикла нужно понять, чем он закончился.</p></div>
+<details class="ans tipd"><summary>Подсказка</summary><div class="body"><p>Как после цикла узнать, вышли через <code>break</code> или попытки просто кончились? Что можно запомнить в переменной прямо перед <code>break</code>?</p></div></details>
+</div>
+<div class="col"><span class="ptitle">Пример результата</span>
+<script type="text/x-console" data-title="угадал">Попытка 1: [[1234]]
+Неверно
+Попытка 2: [[4071]]
+Сейф открыт!</script>
+<script type="text/x-console" data-title="три промаха">Попытка 1: [[1111]]
+Неверно
+Попытка 2: [[2222]]
+Неверно
+Попытка 3: [[3333]]
+Неверно
+Сейф заблокирован</script></div>
+</div>
+</section>
+<section class="slide" data-title="Вопросы по занятию">
+<div class="eyebrow"><span class="kind quiz">? Проверь себя</span> Итоги занятия · урок 3</div>
+<h2>Вопросы по занятию</h2>
+<div class="col">
+<details class="ans"><summary>1. Чем <code>while</code> отличается от <code>if</code> с тем же условием (тема 1.4)?</summary><div class="body"><p><code>if</code> проверяет условие один раз и выполняет тело не больше одного раза. <code>while</code> повторяет тело, пока условие True.</p></div></details>
+<details class="ans"><summary>2. В «Кассовом чеке» ты выходил из цикла по нулю через break. Что будет, если вместо break написать continue?</summary><div class="body"><p>Ноль больше не останавливает: программа всегда спросит все 5 цен, а ноль просто пропустится.</p></div></details>
+<details class="ans"><summary>3. Какой цикл выбрать: а) задать 10 примеров; б) переспрашивать, пока ответ неверный?</summary><div class="body"><p>а) <code>for</code> с <code>range(1, 11)</code> — число повторов известно. б) <code>while</code> — сколько будет попыток, заранее неизвестно. Так устроен мини-проект.</p></div></details>
+</div>
+</section>
+<section class="slide" data-title="Мини-проект: тренажёр">
+<div class="prow"><div class="eyebrow"><span class="kind prac">★ Мини-проект</span> 15 минут вместе с итогами</div><div class="timer" data-min="12"></div></div>
+<h2>Мини-проект: «Тренажёр таблицы умножения»</h2>
+<div class="two w">
+<div class="term" data-prog="trainer" data-title="от запуска до конца"><script type="text/x-sample">Какое число тренируем? [[3]]
+3 * 1 = [[3]]
+Верно!
+3 * 2 = [[6]]
+Верно!
+3 * 3 = [[8]]
+Неверно, ещё раз: [[9]]
+Верно!
+3 * 4 = [[12]]
+Верно!
+3 * 5 = [[стоп]]
+Решено примеров: 4
+Ошибок: 1</script></div>
+<div class="notes"><p>Программа тренирует одно число таблицы умножения: задаёт 10 примеров по порядку, <b>переспрашивает, пока не ответишь верно</b>, и считает ошибки.</p><p>Слово «стоп» — закончить раньше и посмотреть итог.</p><p>Это та программа, которую ты видел в начале занятия.</p></div>
+</div>
+</section>
+<section class="slide" data-title="Мини-проект: что умеет">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> </div>
+<h2>Что умеет программа</h2>
+<div class="four" style="grid-template-columns:1fr 1fr">
+<div class="card"><span class="k">Выбор числа</span><p>Спрашивает, какое число таблицы тренировать.</p></div>
+<div class="card"><span class="k">10 примеров</span><p>Даёт примеры по порядку: от «× 1» до «× 10».</p></div>
+<div class="card"><span class="k">Не отпускает</span><p>Ответил неверно — спрашивает снова и считает ошибку.</p></div>
+<div class="card"><span class="k">Стоп и итог</span><p>По слову «стоп» заканчивает и показывает, сколько решено и сколько ошибок.</p></div>
+</div>
+<div class="key">Это пригодится в Проекте 1: «Викторина» — вопросы по очереди, счёт очков и итог.</div>
+</section>
+<section class="slide" data-title="Мини-проект: план">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> </div>
+<h2>План по шагам</h2>
+<div class="tbl"><table>
+<tr><th class="c">Шаг</th><th>Что сделать</th><th>Что понадобится</th><th>Как проверить</th></tr>
+<tr><td class="c"><b>1</b></td><td>Спроси число и выведи 10 примеров без ответов</td><td>for и range — 1.5; f-строки — 1.2</td><td>Введи 7 — 10 строк от «7 * 1 = ?» до «7 * 10 = ?»</td></tr>
+<tr><td class="c"><b>2</b></td><td>Вместо печати спрашивай ответ: верно — «Верно!» и +1 к решённым, иначе «Неверно». После цикла — «Решено примеров: …»</td><td>if — 1.4; счётчик — 1.5</td><td>Ответь на все 10, один раз ошибись — «Решено примеров: 9»</td></tr>
+<tr><td class="c"><b>3</b></td><td>Замени <code>if</code> на <code>while</code>: пока ответ неверный — +1 к ошибкам и «Неверно, ещё раз: ». После цикла — «Ошибок: …»</td><td>while, счётчик — 1.5</td><td>Ошибись один раз — программа переспросит; в конце «Решено примеров: 10» и «Ошибок: 1». Выйти раньше 10 примеров пока нельзя — это нормально, шаг 4 это исправит</td></tr>
+<tr><td class="c"><b>4</b></td><td>Если вместо ответа ввели «стоп» — выйди из цикла</td><td>break — 1.5</td><td>Введи «стоп» на третьем примере — «Решено примеров: 2», «Ошибок: 0»</td></tr>
+</table></div>
+<div class="key">Проверяй после каждого шага, а не в конце.</div>
+</section>
+<section class="slide" data-title="Мини-проект: заготовка">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> </div>
+<h2>Заготовка</h2>
+<div class="two w">
+<script type="text/x-python" data-file="main.py">
+# Тренажёр таблицы умножения
+number = int(input("Какое число тренируем? "))
+solved = 0      # счётчик решённых примеров
+mistakes = 0    # счётчик ошибок
+
+# Шаг 1: цикл for по множителям i от 1 до 10
+#     Шаг 2: спроси ответ: f"{number} * {i} = "
+#     Шаг 4: если ответ "стоп" — выйди из цикла
+#     Шаг 3: пока int(ответ) не равен number * i —
+#            +1 к ошибкам и «Неверно, ещё раз: »
+#     скажи «Верно!» и +1 к решённым
+
+# После цикла: «Решено примеров: …» и «Ошибок: …»
+</script>
+<div class="notes"><ul>
+<li>Комментарии с отступом — то, что будет <b>внутри</b> цикла.</li>
+<li>Шаг 2 сначала напиши с <code>if</code>, на шаге 3 замени <code>if</code> на <code>while</code>.</li>
+<li>Проверку «стоп» ставь <b>до</b> <code>int()</code>: <code>int("стоп")</code> — ошибка ValueError.</li>
+<li>Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="Мини-проект: готово, если…">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> </div>
+<h2>Готово, если…</h2>
+<div class="two">
+<div class="notes"><ul>
+<li><b>Блок 2.</b> Ввели 7 и всё отвечаем верно — ровно 10 примеров, последний «7 * 10 = ».</li>
+<li><b>Блок 1.</b> Ответили неверно — программа переспрашивает, пока не ответишь верно, и считает ошибку.</li>
+<li><b>Блок 3.</b> Ввели «стоп» — программа сразу пишет итог.</li>
+<li>Ты можешь <b>объяснить каждую строку</b> своего кода.</li>
+</ul></div>
+<div class="col">
+<div class="star"><b>★ Пропуск.</b> Ответ «пропуск» — пример пропускается через <code>continue</code>, в итоге ещё строка.<br><span class="legend">Станет: «Пропущено: 1»</span></div>
+<div class="star"><b>★★ Три промаха.</b> После 3 ошибок на одном примере программа показывает ответ и переходит к следующему.<br><span class="legend">Станет: «Ответ: 14» после третьей ошибки на «7 * 2»</span></div>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Если всё готово: счастливые номера">
+<div class="eyebrow"><span class="kind prac">Если всё готово</span> 10+ минут</div>
+<h2>Челлендж: «Счастливые номера»</h2>
+<div class="two">
+<div class="task"><p>Номер автобуса — число от 1000 до 9999. Он <b>счастливый</b>, если сумма первых двух цифр равна сумме двух последних: 2341 → 2 + 3 = 4 + 1.</p>
+<p>Посчитай, сколько всего счастливых номеров. Цифры достаёшь через <code>//</code> и <code>%</code> (тема 1.3).</p>
+<p>Потом придумай своё правило: «зеркальные» номера (1221), все цифры одинаковые, сумма цифр равна 10 — и посчитай их тоже.</p></div>
+<script type="text/x-console" data-title="пример">Счастливых номеров: 615</script>
+</div>
+</section>
+<section class="slide" data-title="Итоги">
+<div class="hero">
+<div class="eyebrow">Итоги</div>
+<h1>Сегодня я научился</h1>
+<div class="goals"><ul>
+<li>повторять команды циклом <b>while</b>, пока условие верно, и останавливать зависшую программу;</li>
+<li><b>считать и копить</b> в цикле: счётчик и накопитель;</li>
+<li>повторять нужное число раз через <b>for</b> и <b>range</b> и перебирать строку по символам;</li>
+<li>выходить из цикла через <b>break</b> и пропускать шаг через <b>continue</b>.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="В следующий раз">
+<div class="hero">
+<div class="eyebrow">Тема 1.5 · Занятие 2</div>
+<h1>В следующий раз</h1>
+<div class="goals"><ul>
+<li><b>вложенные циклы</b> — вся таблица умножения и узоры из символов;</li>
+<li><b>random</b> — «Угадай число» против компьютера;</li>
+<li><b>else у цикла</b> и <b>while True</b> — сейф без лишней переменной.</li>
+</ul></div>
+<div class="meta"><span>В следующий раз: вложенные циклы, random, else у цикла, while True</span></div>
+</div>
+</section>
+
+  </main>
+  <footer class="nav">
+    <div class="bar" id="bar"></div>
+    <button class="btn" id="prev" type="button">← Назад</button>
+    <span class="hint">← → листать · ↑ ↓ прокрутка · F — полный экран · Ctrl+P — PDF</span>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button">Вперёд →</button>
+  </footer>
+</div>
+<script>
+/* ===== ЗАНЯТИЕ: программы для консолей с запуском и особые виджеты. Меняется в каждой презентации. =====
+   progs.имя = async (io, PY) => {...} — имя совпадает с data-prog у <div class="term">.
+   io.print(текст)            — напечатать строку (как print);
+   await io.input(подсказка)  — спросить ввод (как input), вернёт строку;
+   io.int(строка)             — как int(): на букве печатает ValueError и останавливает программу;
+   await io.sleep(мс)         — пауза, чтобы вывод шёл постепенно.
+   PY.rnd(a, b) — как random.randint(a, b); PY.pick(строка) — как random.choice(строка).
+   Формат вывода должен совпадать с настоящим запуском Python (он лежит в x-sample).
+   init(PY) — место для особых виджетов занятия (ползунки, кубик и т. п.). PY.$(id) — найти элемент.
+   beforePrint(PY) — перед печатью в PDF: дорисовать виджеты в готовом состоянии (кубик брошен, 600 бросков сделаны).
+   afterPrint(PY) — после печати (можно не писать). */
+window.LESSON = {
+  progs: {
+    async trainer(io){
+      const number = io.int(await io.input('Какое число тренируем? '));
+      let solved = 0;
+      let mistakes = 0;
+      for (let i = 1; i < 11; i++){
+        let answer = await io.input(`${number} * ${i} = `);
+        if (answer === 'стоп') break;
+        while (io.int(answer) !== number * i){
+          mistakes += 1;
+          answer = await io.input('Неверно, ещё раз: ');
+        }
+        io.print('Верно!');
+        solved += 1;
+      }
+      io.print(`Решено примеров: ${solved}`);
+      io.print(`Ошибок: ${mistakes}`);
+    },
+    async password(io){
+      const PASSWORD = 'dragon';
+      let tries = 1;
+      let guess = await io.input('Пароль: ');
+      while (guess !== PASSWORD){
+        tries += 1;
+        guess = await io.input('Неверно. Пароль: ');
+      }
+      io.print('Доступ открыт');
+      io.print(`Попыток: ${tries}`);
+    },
+    async receipt(io){
+      let total = 0;
+      for (let item = 1; item < 6; item++){
+        const price = io.int(await io.input(`Цена покупки ${item}: `));
+        if (price === 0) break;
+        if (price < 0){ io.print('Цена не может быть меньше 0'); continue; }
+        total += price;
+      }
+      io.print(`Итого: ${total}`);
+    }
+  },
+  init(PY){
+    const a = PY.$('rg-a'), b = PY.$('rg-b'), c = PY.$('rg-c');
+    if (!a) return;
+    const draw = () => {
+      const s = +a.value, t = +b.value, st = +c.value;
+      PY.$('rg-av').textContent = s; PY.$('rg-bv').textContent = t; PY.$('rg-cv').textContent = st;
+      PY.$('rg-pre').innerHTML = PY.codeLines('for i in range(' + s + ', ' + t + ', ' + st + '):\n    print(i, end=" ")');
+      const out = PY.$('rg-out'), n = PY.$('rg-n');
+      if (st === 0){
+        out.innerHTML = '<span class="e">ValueError: range() arg 3 must not be zero</span>';
+        n.textContent = 'ошибка';
+        return;
+      }
+      const nums = [];
+      for (let i = s; st > 0 ? i < t : i > t; i += st) nums.push(i);
+      n.textContent = nums.length;
+      if (!nums.length){ out.innerHTML = '<span class="dim">пусто — цикл не выполнится ни разу</span>'; return; }
+      const rows = [];
+      for (let k = 0; k < nums.length; k += 10) rows.push(nums.slice(k, k + 10).join(' '));
+      out.textContent = rows.join('\n');
+    };
+    [a, b, c].forEach(el => el.addEventListener('input', draw));
+    draw();
+  },
+  beforePrint(PY){
+  }
+};
+
+</script>
+<script>
+/* ===== ЯДРО ШАБЛОНА: не менять. Компоненты: код, вывод, консоль с запуском, трассировка, вкладки, таймер, навигация, печать. ===== */
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=s=>s[Math.floor(Math.random()*s.length)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const trimBlock=s=>s.replace(/^\n+|\s+$/g,'');
+const printHooks=[]; /* что сделать перед печатью и после */
+
+/* ---------- подсветка Python ---------- */
+const KW=new Set('def async await while for in if elif else return class import from True False None and or not global lambda pass break continue as with try except finally is'.split(' '));
+const BI=new Set('print range input int str len float round abs min max sum list dict set tuple sorted enumerate open type bool'.split(' '));
+const RE=/(#.*$)|(f?"(?:[^"\\]|\\.)*"|f?'(?:[^'\\]|\\.)*')|\b([A-Za-z_][A-Za-z_0-9]*)\b|\b(\d+(?:\.\d+)?)\b/g;
+function hlLine(src){
+  let out='',last=0,m; RE.lastIndex=0;
+  while((m=RE.exec(src))){
+    out+=esc(src.slice(last,m.index));
+    if(m[1]) out+='<span class="tk-com">'+esc(m[1])+'</span>';
+    else if(m[2]){ let s=esc(m[2]); if(m[2][0]==='f') s=s.replace(/\{[^}]*\}/g,x=>'<span class="tk-fx">'+x+'</span>'); out+='<span class="tk-str">'+s+'</span>'; }
+    else if(m[3]) out+=KW.has(m[3])?'<span class="tk-kw">'+m[3]+'</span>':BI.has(m[3])?'<span class="tk-bi">'+m[3]+'</span>':esc(m[3]);
+    else if(m[4]) out+='<span class="tk-num">'+m[4]+'</span>';
+    last=RE.lastIndex;
+  }
+  return out+esc(src.slice(last));
+}
+function codeLines(src,opt){
+  opt=opt||{};
+  const set=a=>new Set(String(a||'').split(',').filter(Boolean).map(Number));
+  const hl=set(opt.hl),bad=set(opt.bad),good=set(opt.good);
+  return src.split('\n').map((l,i)=>{const n=i+1;const c=hl.has(n)?' hl':bad.has(n)?' bad':good.has(n)?' good':'';return '<span class="ln'+c+'">'+(hlLine(l)||' ')+'</span>';}).join('');
+}
+function codeBox(src,d){
+  const wrap=document.createElement('div'); wrap.className='code';
+  wrap.innerHTML='<div class="ch"><span class="lbl"><i>КОД</i> '+esc(d.file||'main.py')+'</span><span class="acts"><button class="mini cp" type="button">Копировать</button></span></div><pre class="py'+(d.nonum!==undefined?' nonum':'')+'">'+codeLines(src,d)+'</pre>';
+  wrap.querySelector('.cp').addEventListener('click',e=>{
+    const b=e.currentTarget; const ok=()=>{b.textContent='Скопировано ✓';setTimeout(()=>b.textContent='Копировать',1400);};
+    try{navigator.clipboard.writeText(src).then(ok,()=>{b.textContent='Не вышло';});}catch(err){b.textContent='Не вышло';}
+  });
+  return wrap;
+}
+/* консольный текст: [[ввод]] — ввод пользователя; блок ошибки — строки с XxxError и ниже красные */
+function consoleHTML(src,isErr){
+  let lines=src.split('\n').map(l=>esc(l).replace(/\[\[(.*?)\]\]/g,(m,v)=>'<span class="u">'+(v||'&nbsp;')+'</span>'));
+  if(isErr){ const cut=lines.findIndex(l=>/^\w+(Error|Exception)\b/.test(l)); lines=lines.map((l,i)=>(cut>=0&&i>=cut)?'<span class="eb">'+l+'</span>':'<span class="e">'+l+'</span>'); }
+  return lines.join('\n');
+}
+
+/* ---------- трассировка: <div class="tracer"> + code + json ---------- */
+document.querySelectorAll('.tracer').forEach(box=>{
+  const codeEl=box.querySelector('script[type="text/x-trace-code"]'), dataEl=box.querySelector('script[type="application/json"]');
+  const src=trimBlock(codeEl.textContent), data=JSON.parse(dataEl.textContent), steps=data.steps, vars=data.vars;
+  box.innerHTML='';
+  const left=document.createElement('div'); left.className='col';
+  const right=document.createElement('div'); right.className='col';
+  const cb=codeBox(src,codeEl.dataset); left.appendChild(cb);
+  left.insertAdjacentHTML('beforeend','<div class="vars">'+vars.map(v=>'<div class="var"><span>'+esc(v)+'</span><b data-v="'+esc(v)+'">—</b></div>').join('')+'<div class="var"><span>шаг</span><b data-n>0</b></div></div><div class="msg">Жми «Шаг →».</div><div class="row"><button class="btn" data-a="prev" type="button">← Назад</button><button class="btn pri" data-a="next" type="button">Шаг →</button><button class="btn" data-a="auto" type="button">▶ Авто</button><button class="btn" data-a="reset" type="button">Сброс</button></div>');
+  right.innerHTML='<div class="con"><div class="ch"><span class="lbl"><i>ВЫВОД</i></span></div><div class="out"></div></div><div class="tbl"><table><tr><th class="c">№</th>'+vars.map(v=>'<th class="c">'+esc(v)+'</th>').join('')+'<th>Что произошло</th></tr></table></div>';
+  box.append(left,right);
+  const lines=[...cb.querySelectorAll('.ln')], out=right.querySelector('.out'), tbl=right.querySelector('table'), msg=left.querySelector('.msg');
+  const rows=[]; let tn=0;
+  steps.forEach(st=>{ if(st.t){ st.tr=++tn; const tr=document.createElement('tr'); if(st.dim) tr.className='nl'; tr.innerHTML='<td class="c">'+tn+'</td>'+vars.map(v=>'<td class="c">'+(st.v&&st.v[v]!==undefined&&st.v[v]!==null?esc(st.v[v]):'—')+'</td>').join('')+'<td>'+esc(st.t)+'</td>'; tbl.appendChild(tr); rows.push(tr);} });
+  let k=-1, iv=null;
+  const btn=a=>left.querySelector('[data-a="'+a+'"]');
+  function draw(){
+    const st=k>=0?steps[k]:null;
+    lines.forEach((l,i)=>l.classList.toggle('hl',!!st&&st.l===i+1));
+    vars.forEach(v=>{left.querySelector('[data-v="'+v+'"]').textContent=st&&st.v&&st.v[v]!==undefined&&st.v[v]!==null?st.v[v]:'—';});
+    left.querySelector('[data-n]').textContent=k+1; msg.textContent=st?st.m:'Жми «Шаг →».';
+    let o=''; for(let i=0;i<=k;i++) if(steps[i].o) o+=steps[i].o; out.textContent=o;
+    rows.forEach((r,i)=>r.classList.toggle('on',!!st&&st.tr===i+1));
+    btn('prev').disabled=k<0; btn('next').disabled=k>=steps.length-1;
+  }
+  const stop=()=>{clearInterval(iv);iv=null;btn('auto').textContent='▶ Авто';};
+  btn('next').addEventListener('click',()=>{stop();if(k<steps.length-1){k++;draw();}});
+  btn('prev').addEventListener('click',()=>{stop();if(k>=0){k--;draw();}});
+  btn('reset').addEventListener('click',()=>{stop();k=-1;draw();});
+  btn('auto').addEventListener('click',()=>{ if(iv){stop();return;} if(k>=steps.length-1) k=-1; btn('auto').textContent='❚❚ Пауза'; iv=setInterval(()=>{k++;draw(); if(k>=steps.length-1) stop();},900); });
+  let kSaved=-1; printHooks.push({before(){stop();kSaved=k;k=steps.length-1;draw();},after(){k=kSaved;draw();}});
+  draw();
+});
+
+/* ---------- код и вывод ---------- */
+document.querySelectorAll('script[type="text/x-python"]').forEach(el=>{ el.replaceWith(codeBox(trimBlock(el.textContent),el.dataset)); });
+document.querySelectorAll('script[type="text/x-console"]').forEach(el=>{
+  const isErr=el.dataset.kind==='error';
+  const wrap=document.createElement('div'); wrap.className='con'+(isErr?' err':'');
+  wrap.innerHTML='<div class="ch"><span class="lbl"><i>'+(isErr?'ОШИБКА':'ВЫВОД')+'</i> '+esc(el.dataset.title||'')+'</span></div><div class="out">'+consoleHTML(trimBlock(el.textContent),isErr)+'</div>';
+  el.replaceWith(wrap);
+});
+
+/* ---------- вкладки ---------- */
+document.querySelectorAll('.tabs').forEach(t=>{
+  const bar=t.querySelector('.tabbar'), tabs=[...t.querySelectorAll(':scope>.tab')];
+  tabs.forEach((tb,i)=>{ const b=document.createElement('button'); b.type='button'; b.textContent=(i+1)+'. '+tb.dataset.tab; b.addEventListener('click',()=>act(i)); bar.appendChild(b); });
+  function act(i){ tabs.forEach((tb,k)=>tb.hidden=k!==i); [...bar.children].forEach((b,k)=>b.classList.toggle('on',k===i)); }
+  act(0);
+});
+
+/* ---------- консоль с запуском: .term[data-prog] + пример настоящего запуска (x-sample) ---------- */
+class Stop extends Error{}
+const LESSON=window.LESSON||{progs:{}};
+function makeTerm(box){
+  const sampleEl=box.querySelector('script[type="text/x-sample"]');
+  const sample=sampleEl?trimBlock(sampleEl.textContent):'';
+  const prog=LESSON.progs&&LESSON.progs[box.dataset.prog];
+  box.innerHTML='<div class="ch"><span class="lbl"><i>ВЫВОД</i> '+esc(box.dataset.title||'')+'</span><span class="acts">'+(prog?'<button class="mini run" type="button">▶ Запустить</button><button class="mini clr" type="button">Очистить</button>':'')+'</span></div><div class="out"></div>';
+  const out=box.querySelector('.out'); let run=0;
+  const showSample=()=>{ out.innerHTML=sample?consoleHTML(sample,false):'<span class="ph">Нажми «▶ Запустить».</span>'; };
+  showSample();
+  if(!prog) return;
+  const add=html=>{out.insertAdjacentHTML('beforeend',html);out.scrollTop=out.scrollHeight;};
+  function io(id){
+    const alive=()=>{if(id!==run) throw new Stop();};
+    return {
+      print(s,cls){alive();add((cls?'<span class="'+cls+'">'+esc(s)+'</span>':esc(s))+'\n');},
+      async sleep(ms){await sleep(ms);alive();},
+      input(prompt){alive();
+        return new Promise((res,rej)=>{
+          add(esc(prompt)); const inp=document.createElement('input'); inp.className='tin'; inp.type='text'; inp.autocomplete='off'; inp.spellcheck=false;
+          out.appendChild(inp); try{inp.focus({preventScroll:true});}catch(e){}
+          const chk=setInterval(()=>{if(id!==run){clearInterval(chk);rej(new Stop());}},200);
+          inp.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); clearInterval(chk); const v=inp.value; inp.replaceWith(Object.assign(document.createElement('span'),{className:'u',textContent:v||' '})); add('\n'); if(id!==run) rej(new Stop()); else res(v);} });
+        });
+      },
+      int(s){const t=String(s).trim(); if(!/^[+-]?\d+$/.test(t)){alive(); add('<span class="e">Traceback (most recent call last):\n  File "main.py", line 1, in &lt;module&gt;\n</span><span class="eb">ValueError: invalid literal for int() with base 10: \''+esc(s)+'\'</span>\n'); throw new Stop('err');} return parseInt(t,10);}
+    };
+  }
+  async function start(){
+    const id=++run; out.innerHTML='';
+    try{ await prog(io(id),PY); if(id===run) add('<span class="fin">— программа завершена —</span>'); }
+    catch(e){ if(!(e instanceof Stop)) console.error(e); else if(e.message==='err'&&id===run) add('<span class="fin">— программа упала с ошибкой —</span>'); }
+  }
+  box.querySelector('.run').addEventListener('click',start);
+  box.querySelector('.clr').addEventListener('click',()=>{run++;out.innerHTML='<span class="ph">Нажми «▶ Запустить».</span>';});
+}
+const PY={$,esc,rnd,pick,sleep,codeLines,consoleHTML};
+document.querySelectorAll('.term').forEach(makeTerm);
+
+/* ---------- таймер практики ---------- */
+document.querySelectorAll('.timer[data-min]').forEach(t=>{
+  const total=+t.dataset.min*60; let left=total, iv=null;
+  t.innerHTML='<span class="tv"></span><button class="btn" type="button">▶ Старт</button><button class="btn" type="button" title="Сбросить">↺</button>';
+  const tv=t.querySelector('.tv'), [go,rs]=t.querySelectorAll('button');
+  const draw=()=>{tv.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0'); t.classList.toggle('done',left===0);};
+  go.addEventListener('click',()=>{ if(iv){clearInterval(iv);iv=null;go.textContent='▶ Старт';return;} if(left===0) left=total; go.textContent='❚❚ Пауза'; iv=setInterval(()=>{left=Math.max(0,left-1);draw(); if(!left){clearInterval(iv);iv=null;go.textContent='▶ Старт';}},1000); });
+  rs.addEventListener('click',()=>{clearInterval(iv);iv=null;left=total;go.textContent='▶ Старт';draw();});
+  draw();
+});
+
+/* ---------- особые виджеты занятия ---------- */
+try{ if(LESSON.init) LESSON.init(PY); }catch(e){ console.error(e); }
+
+/* ---------- слайды, навигация, тема, масштаб ---------- */
+const slides=[...document.querySelectorAll('main>.slide')];
+const jump=$('jump'),prev=$('prev'),next=$('next'),count=$('count'),main=$('main'),bar=$('bar');
+slides.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+(s.dataset.title||'');jump.appendChild(o);});
+let cur=0;
+function show(i,fromHash){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>{s.hidden=k!==cur;s.classList.toggle('enter',k===cur);});
+  jump.value=cur; count.textContent=(cur+1)+' / '+slides.length; bar.style.width=((cur+1)/slides.length*100)+'%';
+  prev.disabled=cur===0; next.disabled=cur===slides.length-1; main.scrollTop=0;
+  if(!fromHash){try{history.replaceState(null,'','#s'+(cur+1));}catch(e){}}
+}
+function fromHash(){const m=/^#s(\d+)$/.exec(location.hash);show(m?parseInt(m[1],10)-1:0,true);}
+prev.addEventListener('click',()=>show(cur-1));
+next.addEventListener('click',()=>show(cur+1));
+jump.addEventListener('change',()=>show(parseInt(jump.value,10)));
+window.addEventListener('hashchange',fromHash);
+function fsToggle(){try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){}}
+$('fs').addEventListener('click',fsToggle);
+document.addEventListener('keydown',e=>{
+  const t=e.target; if(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA'){ if(e.key==='Escape') t.blur(); return; }
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();show(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1);}
+  else if(e.key==='ArrowDown'){main.scrollBy({top:120,behavior:'smooth'});e.preventDefault();}
+  else if(e.key==='ArrowUp'){main.scrollBy({top:-120,behavior:'smooth'});e.preventDefault();}
+  else if(e.key.length===1&&'fFаА'.includes(e.key)){fsToggle();}
+});
+const root=document.documentElement;
+function setTheme(t){root.dataset.theme=t; store.set('py-theme',t);}
+setTheme(store.get('py-theme')||'dark');
+$('theme').addEventListener('click',()=>setTheme(root.dataset.theme==='light'?'dark':'light'));
+let z=parseFloat(store.get('py-zoom2'))||1;
+function setZoom(v){z=Math.max(.7,Math.min(1.5,Math.round(v*10)/10)); main.style.zoom=z; store.set('py-zoom2',z);}
+setZoom(z);
+$('zp').addEventListener('click',()=>setZoom(z+.1)); $('zm').addEventListener('click',()=>setZoom(z-.1));
+/* печать (Ctrl+P → PDF): подсказки открыты, итоговый код скрыт; ответы — по кнопке «PDF: …» */
+let withAns=store.get('py-pdf-ans')==='1';
+const pans=$('pans');
+const drawPans=()=>{pans.textContent=withAns?'PDF: с ответами':'PDF: без ответов';};
+pans.addEventListener('click',()=>{withAns=!withAns;store.set('py-pdf-ans',withAns?'1':'0');drawPans();});
+drawPans();
+let saved=[], printing=false;
+window.addEventListener('beforeprint',()=>{
+  if(printing) return; printing=true;
+  saved=[...document.querySelectorAll('details')].map(d=>[d,d.open]);
+  document.querySelectorAll('details').forEach(d=>{d.open=d.classList.contains('tipd')||(withAns&&!d.classList.contains('sol'));});
+  printHooks.forEach(h=>{try{h.before();}catch(e){console.error(e);}});
+  try{ if(LESSON.beforePrint) LESSON.beforePrint(PY); }catch(e){ console.error(e); }
+});
+window.addEventListener('afterprint',()=>{
+  if(!printing) return; printing=false;
+  saved.forEach(([d,o])=>d.open=o);
+  printHooks.forEach(h=>{try{h.after();}catch(e){console.error(e);}});
+  try{ if(LESSON.afterPrint) LESSON.afterPrint(PY); }catch(e){ console.error(e); }
+});
+fromHash();
+})();
+
+</script>
+</body>
+</html>

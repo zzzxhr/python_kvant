@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>1.5. Практика. Занятие 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Unbounded:wght@500;700&display=swap">
+<style>
+
+/* ===== ЯДРО ШАБЛОНА: не менять. Projector-first: type scales with the screen (rem), high contrast, one meaning per colour.
+   green = rule/correct, red = trap/error, yellow = task/user input/star, blue = code/live coding. */
+html{font-size:clamp(14px, calc(.85vw + .55vh), 28px)}
+:root{
+  --bg:#06140F; --surface:#0E2219; --surface2:#143024; --fg:#F3FBF6; --muted:#BAD3C6; --line:#2B4C3D;
+  --accent:#3EE6A0; --accent-strong:#8DF5C8; --accent-soft:rgba(62,230,160,.13);
+  --blue:#6CC6FF; --blue-soft:rgba(108,198,255,.13);
+  --yellow:#FFD15C; --yellow-soft:rgba(255,209,92,.13);
+  --red:#FF7B7B; --red-soft:rgba(255,123,123,.13);
+  --purple:#C4A6FF; --purple-soft:rgba(196,166,255,.14);
+  --code-bg:#030C09; --code-head:#0A1A14; --code-line:#1B3A2D; --code-fg:#EAF6EF; --ln:#4D7465;
+  --kw:#5EF0B0; --bi:#7DD3FC; --str:#FFD866; --num:#FFAE6B; --com:#93B8A9; --fx:#FF9ED2;
+  --hero1:#0F6447; --hero2:#05291E;
+  --font-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#F5F3EC; --surface:#FFFFFF; --surface2:#EEF3EE; --fg:#0E1B15; --muted:#3F544A; --line:#C9D4CB;
+  --accent:#08784F; --accent-strong:#055C3C; --accent-soft:#DDF1E6;
+  --blue:#0B62A8; --blue-soft:#E1EEF9;
+  --yellow:#9A6200; --yellow-soft:#FBEFD3;
+  --red:#C12E2E; --red-soft:#FBE4E2;
+  --purple:#6A3FC9; --purple-soft:#EEE7FC;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:1rem;line-height:1.5}
+.app{height:100%;display:flex;flex-direction:column;padding-inline:max(1rem,env(safe-area-inset-left,0px))}
+
+/* chrome — kept small so the slide gets the space */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:6px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:14px}
+.brand{font-family:var(--font-display);font-weight:700;font-size:13px;display:flex;align-items:center;gap:9px}
+.brand span{color:var(--accent)}
+.brand .logo{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#0F6447,#3EE6A0);display:grid;place-items:center;color:#fff;font:700 12px var(--font-mono)}
+.tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#jump,.ib{font:inherit;font-size:13px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 9px;cursor:pointer}
+#jump{max-width:min(320px,100%)}
+.ib:hover,#jump:hover{border-color:var(--accent)}
+main{flex:1;overflow-y:auto;padding-block:1.4rem 2.2rem}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:7px;border-top:1px solid var(--line);position:relative;font-size:14px}
+.bar{position:absolute;left:0;top:-2px;height:3px;background:var(--accent);transition:width .25s;border-radius:0 3px 3px 0}
+.nav .btn{font-size:14px;padding:7px 14px}
+.count{font-family:var(--font-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted)}
+@media (max-width:700px){.hint{display:none}}
+
+.btn{font:600 .85rem var(--font-body);background:var(--surface);color:var(--fg);border:1.5px solid var(--line);border-radius:10px;padding:.45em .95em;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:#03231A;border-color:transparent}
+:root[data-theme="light"] .btn.pri{color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* slide */
+.slide{max-width:1640px;margin:0 auto;display:flex;flex-direction:column;gap:1.1rem}
+.eyebrow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kind{display:inline-flex;align-items:center;gap:.35em;padding:.3em .7em;border-radius:999px;font-weight:700;letter-spacing:.06em;color:var(--accent);background:var(--accent-soft);border:1.5px solid currentColor}
+.kind.trap{color:var(--red);background:var(--red-soft)}
+.kind.prac{color:var(--yellow);background:var(--yellow-soft)}
+.kind.live{color:var(--blue);background:var(--blue-soft)}
+.kind.quiz{color:var(--purple);background:var(--purple-soft)}
+h1,h2,h3{margin:0}
+h1,h2{font-family:var(--font-display);font-weight:700;text-wrap:balance;line-height:1.12}
+h1{font-size:3.3rem}
+h2{font-size:2.15rem}
+.lead{font-size:1.2rem;color:var(--muted);max-width:62ch;margin:0}
+.lead b,.lead code{color:var(--fg)}
+.head{display:flex;flex-direction:column;gap:.5rem}
+p{margin:0}
+b,strong{font-weight:700}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+.two.w{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+@media (max-width:980px){.two,.two.w,.three{grid-template-columns:minmax(0,1fr)}.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.col{display:flex;flex-direction:column;gap:.85rem;min-width:0}
+
+/* code / output — always labelled so pupils never mix them up */
+.code,.con,.term{border-radius:14px;overflow:hidden;background:var(--code-bg);border:1.5px solid var(--code-line);min-width:0}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:.4rem .8rem;background:var(--code-head);border-bottom:1.5px solid var(--code-line);font:600 .7rem var(--font-mono);color:#A9C9BB}
+.lbl{display:inline-flex;align-items:center;gap:.5em}
+.lbl i{font-style:normal;font-weight:700;letter-spacing:.08em;padding:.15em .55em;border-radius:6px}
+.code .lbl i{background:#0E3756;color:#8ED3FF}
+.con .lbl i,.term .lbl i{background:#3A3010;color:#FFD866}
+.con.err{border-color:#5A2626}
+.con.err .lbl i{background:#4A1A1A;color:#FF9C9C}
+.con.err .out{white-space:pre-wrap;overflow-wrap:anywhere}
+.acts{display:flex;gap:6px}
+.mini{font:600 .66rem var(--font-mono);background:transparent;color:#A9C9BB;border:1px solid #2A4A3C;border-radius:7px;padding:.25em .7em;cursor:pointer}
+.mini:hover{border-color:#3EE6A0;color:#fff}
+.mini.run{background:#18855C;color:#fff;border-color:transparent;font-size:.75rem;padding:.3em .9em}
+pre{margin:0}
+pre.py{padding:.75rem 0;color:var(--code-fg);font:1rem/1.6 var(--font-mono);overflow-x:auto;counter-reset:ln}
+pre.py .ln{display:block;padding:0 1rem 0 2.6rem;position:relative;white-space:pre;min-height:1.6em}
+pre.py .ln::before{counter-increment:ln;content:counter(ln);position:absolute;left:0;width:1.8rem;text-align:right;color:var(--ln);font-size:.75em}
+pre.py.nonum .ln{padding-left:1rem}
+pre.py.nonum .ln::before{display:none}
+pre.py .ln.hl{background:rgba(62,230,160,.18);box-shadow:inset 4px 0 0 #3EE6A0}
+pre.py .ln.bad{background:rgba(255,100,100,.18);box-shadow:inset 4px 0 0 #FF6B6B}
+pre.py .ln.good{background:rgba(62,230,160,.16);box-shadow:inset 4px 0 0 #3EE6A0}
+.tk-kw{color:var(--kw);font-weight:700}.tk-bi{color:var(--bi)}.tk-str{color:var(--str)}.tk-com{color:var(--com);font-style:italic}.tk-num{color:var(--num)}.tk-fx{color:var(--fx);font-weight:700}
+.out{padding:.7rem 1rem;color:#F0F7F3;font:1rem/1.55 var(--font-mono);white-space:pre;overflow-x:auto;tab-size:8;min-height:2.6rem}
+.out .u{color:#1E1600;background:#FFD15C;border-radius:5px;padding:0 .3em;font-weight:700}
+.out .e{color:#FFB3B3}
+.out .eb{color:#FF7B7B;font-weight:700}
+.out .dim{color:#7FA696;font-style:italic}
+.out .hl6{color:#1E1600;background:#FFD15C;border-radius:4px;padding:0 .15em;font-weight:700}
+.legend{font-size:.85rem;color:var(--muted)}
+.legend .u{color:#1E1600;background:#FFD15C;border-radius:5px;padding:0 .3em;font-family:var(--font-mono);font-weight:700}
+
+.term .out{min-height:6rem;max-height:24rem;overflow-y:auto}
+.term input.tin{font:inherit;background:rgba(255,209,92,.12);border:0;border-bottom:2px solid #FFD15C;color:#FFD15C;outline:none;width:12ch;padding:0 .2em;font-weight:700}
+.term .fin,.term .ph{color:#6E9585;font-style:italic}
+
+/* text blocks */
+.notes{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:.9rem 1.15rem}
+.notes h3{margin:0 0 .45rem;font-size:1.02rem;font-weight:700}
+.notes ul,.notes ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.4rem}
+.notes li::marker{color:var(--accent);font-weight:700}
+.notes p+p{margin-top:.5rem}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--accent-soft);color:var(--accent-strong);padding:.05em .35em;border-radius:6px;white-space:nowrap}
+:root[data-theme="light"] code{color:var(--accent-strong)}
+.notes.warn{border-color:var(--red);background:var(--red-soft)}
+.notes.warn h3{color:var(--red)}
+.notes.tip{border-color:var(--accent);background:var(--accent-soft)}
+.notes.tip h3{color:var(--accent)}
+.key{display:flex;gap:1rem;align-items:center;border-radius:14px;padding:.95rem 1.2rem;background:var(--accent-soft);border:2px solid var(--accent);font-size:1.15rem;font-weight:600}
+.key::before{content:"Главное";flex:none;font:700 .68rem var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:#03231A;background:var(--accent);padding:.35em .65em;border-radius:7px}
+:root[data-theme="light"] .key::before{color:#fff}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:.95rem;display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.card .k{font:700 .7rem var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.card b.t{font-family:var(--font-display);font-weight:500;font-size:1.1rem}
+.card p{color:var(--muted)}
+.ptitle{font-family:var(--font-mono);font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.tag{align-self:flex-start;font:700 .75rem var(--font-body);padding:.3em .8em;border-radius:999px;border:1.5px solid currentColor}
+.tag.bad{color:var(--red);background:var(--red-soft)}.tag.good{color:var(--accent);background:var(--accent-soft)}
+.tag.bad::before{content:"✗ "}.tag.good::before{content:"✓ "}
+
+/* tables */
+.tbl{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.tbl table{width:100%;border-collapse:collapse;font-size:1rem}
+.tbl th{font:700 .68rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface2);text-align:left;padding:.55rem .9rem}
+.tbl td{padding:.55rem .9rem;border-top:1.5px solid var(--line);vertical-align:top}
+.tbl td.c,.tbl th.c{text-align:center}
+.tbl tr.on td{background:var(--accent-soft);box-shadow:inset 0 0 0 0 var(--accent)}
+.tbl tr.on td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
+.tbl tr.nl td{color:var(--muted);font-style:italic}
+
+/* reveal */
+details.ans{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+details.ans[open]{border-color:var(--purple)}
+details.ans>summary{list-style:none;cursor:pointer;padding:.75rem 1rem .75rem 3.1rem;position:relative;font-weight:600;font-size:1.05rem}
+details.ans>summary::-webkit-details-marker{display:none}
+details.ans>summary::before{content:"?";width:1.6rem;height:1.6rem;border-radius:8px;display:grid;place-items:center;background:var(--purple-soft);color:var(--purple);font:700 .95rem var(--font-mono);position:absolute;left:.9rem;top:.75rem}
+details.ans[open]>summary::before{content:"✓";background:var(--purple);color:#1A0F33}
+details.ans>summary .sm{font-weight:400;color:var(--muted);font-size:.85rem;margin-left:.5rem}
+details.ans>.body{padding:0 1.1rem 1rem 3.1rem;display:flex;flex-direction:column;gap:.75rem;font-size:1.02rem}
+details.sol{border-style:dashed}
+details.sol[open]{border-color:var(--yellow);border-style:solid}
+details.sol>summary::before{content:"✎";background:var(--yellow-soft);color:var(--yellow)}
+details.sol[open]>summary::before{content:"✎";background:var(--yellow);color:#1E1600}
+details.sol>.body{padding-left:1.1rem}
+.qs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:start}
+@media (max-width:980px){.qs{grid-template-columns:minmax(0,1fr)}}
+
+/* hero */
+.hero{background:radial-gradient(120% 140% at 0% 0%,var(--hero1),var(--hero2));color:#F2FBF6;border-radius:22px;padding:clamp(1.6rem,4vw,3.4rem);display:flex;flex-direction:column;gap:1.1rem;position:relative;overflow:hidden;min-height:62vh;justify-content:center}
+.hero::after{content:"";position:absolute;right:-4rem;top:-4rem;width:22rem;height:22rem;border-radius:50%;border:3rem solid rgba(255,255,255,.045)}
+.hero .eyebrow{color:#8DF5C8}
+.hero .lead{color:#CBE8DA;font-size:1.3rem}
+.hero .goals{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.14);border-radius:14px;padding:1rem 1.3rem;max-width:46rem;font-size:1.1rem}
+.hero .goals h3{font-size:1.05rem;margin-bottom:.4rem}
+.hero .goals ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:.3rem}
+.hero .goals li::marker{color:#8DF5C8}
+.hero .meta{display:flex;gap:.6rem;flex-wrap:wrap}
+.hero .meta span{font:600 .8rem var(--font-mono);background:rgba(0,0,0,.25);border-radius:999px;padding:.35em .9em;color:#D8F2E6}
+.hero .num{font-family:var(--font-display);font-size:7rem;line-height:.9;color:rgba(141,245,200,.22);position:absolute;right:2.5rem;bottom:1.5rem;font-weight:700}
+
+/* practice */
+.task{border:2px solid var(--yellow);border-radius:14px;background:var(--surface);padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.6rem}
+.task .story{color:var(--muted);font-style:italic}
+.task ul{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.4rem}
+.task li::marker{color:var(--yellow);font-weight:700}
+.star{border:1.5px dashed var(--yellow);background:var(--yellow-soft);border-radius:14px;padding:.75rem 1rem}
+.star b{color:var(--yellow)}
+.stuck{font-size:.9rem;color:var(--muted)}
+.timer{display:inline-flex;align-items:center;gap:.5rem}
+.timer .tv{font:700 1.7rem var(--font-mono);font-variant-numeric:tabular-nums;color:var(--yellow);min-width:3.6ch}
+.timer.done .tv{color:var(--red)}
+.prow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* tabs */
+.tabs{display:flex;flex-direction:column;gap:.9rem}
+.tabbar{display:flex;gap:.5rem;flex-wrap:wrap}
+.tabbar button{font:600 .9rem var(--font-body);background:var(--surface);color:var(--muted);border:1.5px solid var(--line);border-radius:999px;padding:.4em 1em;cursor:pointer}
+.tabbar button.on{background:var(--accent);color:#03231A;border-color:transparent}
+:root[data-theme="light"] .tabbar button.on{color:#fff}
+
+/* widgets */
+.wg{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.wg .row,.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.wg label{color:var(--muted);display:flex;align-items:center;gap:.5rem}
+.wg input[type=range]{accent-color:var(--accent);width:9rem;height:1.2rem}
+.wg input[type=text]{font:1rem var(--font-mono);background:var(--bg);color:var(--fg);border:1.5px solid var(--line);border-radius:9px;padding:.3em .6em;width:10ch}
+.big{font:700 1.05rem var(--font-mono);color:var(--accent)}
+.vars{display:flex;gap:.7rem;flex-wrap:wrap}
+.var{background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:.45rem .9rem;font-family:var(--font-mono);min-width:5.5rem}
+.var span{display:block;font-size:.65rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.var b{font-size:1.7rem;color:var(--accent);line-height:1.15}
+.msg{font-size:1.08rem;min-height:1.5em;font-weight:500}
+.die{width:6.5rem;height:6.5rem;border-radius:1.3rem;background:#fff;box-shadow:0 6px 0 #B9C9C0,0 10px 24px rgba(0,0,0,.3);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:.95rem;gap:2px}
+.die i{width:1.05rem;height:1.05rem;border-radius:50%;background:#0F5C43;place-self:center;visibility:hidden}
+.die i.on{visibility:visible}
+.die.roll{animation:roll .45s ease-out}
+@keyframes roll{0%{transform:rotate(-25deg) scale(.85)}60%{transform:rotate(12deg) scale(1.05)}100%{transform:none}}
+.letter{width:6.5rem;height:6.5rem;border-radius:1.1rem;background:var(--accent-soft);border:3px solid var(--accent);display:grid;place-items:center;font:700 3.2rem var(--font-display);color:var(--accent)}
+.hist{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.6rem;align-items:end;height:12rem;padding-top:.6rem}
+.hist div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:.25rem;height:100%}
+.hist .b{width:100%;background:var(--accent);border-radius:8px 8px 0 0;transition:height .3s;min-height:2px}
+.hist .v{font:600 .8rem var(--font-mono);color:var(--muted)}
+.hist .l{font:700 1rem var(--font-mono)}
+.week{display:grid;grid-template-columns:2.6rem repeat(4,minmax(0,1fr));gap:.4rem;font-size:.85rem}
+.week .d{font:700 .85rem var(--font-mono);color:var(--muted);display:flex;align-items:center}
+.week .c{background:var(--bg);border:1.5px solid var(--line);border-radius:9px;padding:.45rem .2rem;text-align:center;font-family:var(--font-mono);color:var(--muted);transition:background .15s}
+.week .c.done{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.week .c.cur{background:var(--accent);color:#03231A;font-weight:700;border-color:transparent}
+.week .d.cur{color:var(--accent)}
+.nest{border:2.5px solid var(--accent);border-radius:14px;padding:.8rem 1rem;display:flex;flex-direction:column;gap:.6rem;background:var(--accent-soft)}
+.nest .in2{border:2.5px dashed var(--blue);border-radius:12px;padding:.7rem .9rem;background:var(--surface)}
+.nest .lab{font:700 .8rem var(--font-mono);color:var(--accent)}
+.nest .in2 .lab{color:var(--blue)}
+.flow{display:flex;flex-direction:column;gap:.75rem}
+.path{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.path .st{background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:.4rem .75rem}
+.path .st.g{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:700}
+.path .st.r{border-color:var(--red);color:var(--red);background:var(--red-soft);font-weight:700;text-decoration:line-through}
+.path .ar{color:var(--muted);font-family:var(--font-mono);font-weight:700}
+.path .pl{font:700 .72rem var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:5.5rem}
+.bets{display:flex;gap:.4rem}
+.bets button.on{background:var(--accent);color:#03231A;border-color:transparent}
+.cmp{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1rem;align-items:center}
+@media (prefers-reduced-motion:no-preference){.slide.enter{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}}
+
+/* screenshot placeholder (работа в программах рисуется рамкой) */
+/* только для экрана / только для PDF */
+.onlyprint{display:none}
+.shot{border:2.5px dashed #8E9A94;border-radius:14px;min-height:11rem;display:grid;place-items:center;color:var(--muted);font-size:.95rem;text-align:center;padding:1rem;background:var(--surface)}
+/* tracer */
+.tracer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+@media (max-width:980px){.tracer{grid-template-columns:minmax(0,1fr)}}
+.result-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+@media (max-width:980px){.result-pair{grid-template-columns:minmax(0,1fr)}}
+.term .sample-note{color:#6E9585;font-style:italic}
+/* print / PDF для учеников: все слайды по одному на страницу, ответы и решения скрыты, подсказки открыты */
+@media print{
+  @page{size:338mm 190mm;margin:8mm}
+  html{font-size:10.5pt}
+  :root,:root[data-theme]{--bg:#FFFFFF;--surface:#FFFFFF;--surface2:#EEF3EE;--fg:#0E1B15;--muted:#3F544A;--line:#C9D4CB;--accent:#08784F;--accent-strong:#055C3C;--accent-soft:#DDF1E6;--blue:#0B62A8;--blue-soft:#E1EEF9;--yellow:#9A6200;--yellow-soft:#FBEFD3;--red:#C12E2E;--red-soft:#FBE4E2;--purple:#6A3FC9;--purple-soft:#EEE7FC}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body,.app{height:auto;background:#fff}
+  .top,.nav,.acts,.timer button,.tabbar,.tracer .row,.wg button,.wg input{display:none!important}
+  main{overflow:visible;padding:0;zoom:1!important}
+  main .slide,main .slide[hidden]{display:flex!important;break-after:page;page-break-after:always;animation:none!important;max-width:none}
+  .tab[hidden]{display:block!important}
+  .tab+.tab{margin-top:1rem}
+  details.sol{display:none!important}
+  .hero{min-height:auto}
+  .out,.term .out{max-height:none!important;overflow:visible;white-space:pre-wrap}
+  pre.py .ln{white-space:pre-wrap}
+  .wg label{display:none}
+  .noprint,.term .ph,.tracer .msg{display:none!important}
+  .onlyprint{display:block!important}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="logo">py</span>Python <span>· 1.5. Практика. Занятие 1</span></div>
+    <div class="tools">
+      <select id="jump" aria-label="Перейти к слайду"></select>
+      <button class="ib" id="zm" type="button" title="Мельче">A−</button>
+      <button class="ib" id="zp" type="button" title="Крупнее">A+</button>
+      <button class="ib" id="theme" type="button" title="Светлая / тёмная тема">Тема</button>
+      <button class="ib" id="fs" type="button" title="Во весь экран (F)">⛶ Экран</button>
+      <button class="ib" id="pans" type="button" title="Печатать ли ответы на вопросы в PDF (Ctrl+P)">PDF: без ответов</button>
+    </div>
+  </header>
+  <main id="main">
+<!-- ===== СЛАЙДЫ: всё содержание занятия — только между этой меткой и </main> ===== -->
+<section class="slide" data-title="1.5. Практика. Занятие 1">
+<div class="hero">
+<div class="eyebrow">Часть 1. Основы Python · Тема 1.5 · Практика к занятию 1</div>
+<h1>1.5. Практика. Занятие 1</h1>
+<div class="goals"><h3>Сегодня тренируем:</h3><ul>
+<li>цикл <b>while</b> и как чинить <b>бесконечный цикл</b>;</li>
+<li><b>счётчик и накопитель</b>;</li>
+<li><b>for</b>, <b>range</b> и перебор строки по символам;</li>
+<li><b>break</b> и <b>continue</b>.</li>
+</ul></div>
+<div class="meta"><span>3 урока по 40 минут</span><span>6 заданий</span><span>мини-проект «Касса кинозала»</span></div>
+</div>
+</section>
+<section class="slide" data-title="Вспомним: while">
+<div class="eyebrow">Вспомним · тема 1.5, занятие 1</div>
+<h2>Вспомним: while и бесконечный цикл</h2>
+<div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py" data-hl="2">
+count = 3
+while count > 0:
+    print(count)
+    count -= 1
+print("Старт!")
+</script>
+<script type="text/x-console">3
+2
+1
+Старт!</script></div>
+<div class="notes"><ul>
+<li>Условие проверяется <b>перед каждым кругом</b>.</li>
+<li>В теле что-то должно меняться — иначе цикл бесконечный.</li>
+<li>Зависло — <b>Ctrl+C</b> в терминале VS Code или <b>«Стоп»</b> в Thonny.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="Вспомним: счётчик и накопитель">
+<div class="eyebrow">Вспомним · тема 1.5, занятие 1</div>
+<h2>Вспомним: счётчик и накопитель</h2>
+<div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py" data-hl="4,5">
+total = 0
+count = 0
+for score in range(10, 31, 10):
+    total += score
+    count += 1
+print(f"Сумма: {total}, раз: {count}")
+</script>
+<script type="text/x-console">Сумма: 60, раз: 3</script></div>
+<div class="notes"><ul>
+<li><b>Счётчик</b> — <code>count += 1</code>: сколько раз.</li>
+<li><b>Накопитель</b> — <code>total += значение</code>: сколько всего.</li>
+<li>Оба получают начальное значение <b>до цикла</b>.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="Вспомним: for, range и строка">
+<div class="eyebrow">Вспомним · тема 1.5, занятие 1</div>
+<h2>Вспомним: for, range и строка</h2>
+<div class="two">
+<div class="tbl"><table>
+<tr><th>Запись</th><th>Числа</th></tr>
+<tr><td><code>range(4)</code></td><td>0 1 2 3</td></tr>
+<tr><td><code>range(1, 5)</code></td><td>1 2 3 4 — stop не входит</td></tr>
+<tr><td><code>range(0, 10, 3)</code></td><td>0 3 6 9</td></tr>
+<tr><td><code>range(5, 0, -1)</code></td><td>5 4 3 2 1</td></tr>
+</table></div>
+<div class="col"><script type="text/x-python" data-file="main.py">
+for letter in "кот":
+    print(letter)
+</script>
+<script type="text/x-console">к
+о
+т</script>
+<p class="legend">for по строке берёт символы по одному, слева направо.</p></div>
+</div>
+</section>
+<section class="slide" data-title="Вспомним: break и continue">
+<div class="eyebrow">Вспомним · тема 1.5, занятие 1</div>
+<h2>Вспомним: break и continue</h2>
+<div class="two">
+<div class="col"><script type="text/x-python" data-file="main.py" data-hl="3,5">
+for n in range(1, 8):
+    if n == 3:
+        continue
+    if n == 6:
+        break
+    print(n, end=" ")
+</script>
+<script type="text/x-console">1 2 4 5</script></div>
+<div class="notes"><ul>
+<li><code>continue</code> — пропустить остаток тела, к следующему кругу: 3 не напечаталось.</li>
+<li><code>break</code> — сразу выйти из цикла: на 6 всё закончилось.</li>
+<li>В <code>while</code> меняй переменную <b>до</b> <code>continue</code>.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="План практики">
+<div class="eyebrow">Начало · урок 1</div>
+<h2>План практики</h2>
+<div class="tbl"><table>
+<tr><th class="c">№</th><th>Задание</th><th>Уровень</th><th>Темы</th><th class="c">Урок</th><th class="c">Минут</th></tr>
+<tr><td class="c"><b>1</b></td><td>Почини зависание</td><td>база</td><td>while, бесконечный цикл</td><td class="c">1</td><td class="c">9</td></tr><tr><td class="c"><b>2</b></td><td>Табло стадиона</td><td>база</td><td>for, range с шагом</td><td class="c">1</td><td class="c">9</td></tr><tr><td class="c"><b>3</b></td><td>Ник по буквам</td><td>база</td><td>for по строке, счётчик</td><td class="c">1</td><td class="c">9</td></tr><tr><td class="c"><b>★★</b></td><td>Число-перевёртыш</td><td>для сильных</td><td>while, % и //</td><td class="c">1</td><td class="c">—</td></tr><tr><td class="c"><b>4</b></td><td>Шагомер за неделю</td><td>база</td><td>for, range, счётчик, накопитель</td><td class="c">2</td><td class="c">12</td></tr><tr><td class="c"><b>5</b></td><td>Слово-пароль</td><td>база</td><td>while, break, continue, счётчик</td><td class="c">2</td><td class="c">13</td></tr><tr><td class="c"><b>6</b></td><td>Цензор чата</td><td>база</td><td>for по строке, break, continue, счётчик</td><td class="c">2</td><td class="c">13</td></tr><tr><td class="c"><b>★★</b></td><td>Самая длинная серия</td><td>для сильных</td><td>for по строке, два счётчика</td><td class="c">2</td><td class="c">—</td></tr><tr><td class="c"><b>МП</b></td><td>Касса кинозала</td><td>мини-проект</td><td>всё занятие</td><td class="c">3</td><td class="c">25–30</td></tr>
+</table></div>
+<div class="key">Каждое следующее задание чуть сложнее. ★★ — для тех, кто успел всё остальное.</div>
+</section>
+<section class="slide" data-title="Задание 1: почини зависание">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 1 · Задание 1 · 9 минут</div><div class="timer" data-min="9"></div></div>
+<h2>Задание 1: «Почини зависание»</h2>
+<div class="two"><div class="col"><div class="task"><p class="story">Три программы зависают. Почини их, не переписывая заново.</p><ul><li>Запусти программу — она зависнет. Останови: <b>Ctrl+C</b> или «Стоп».</li><li>Найди по выводу, почему условие никогда не становится False.</li><li>Исправь одну строку и проверь: программа должна закончиться сама.</li></ul><p><b>Что понадобится:</b> while — 1.5; бесконечный цикл и как его остановить — 1.5</p></div><div class="notes tip"><h3>Подсказка</h3><p>Посмотри, как меняется переменная из условия на каждом круге. Подходит ли она вообще к концу цикла?</p></div>
+<div class="star"><b>★ Успел раньше?</b> Придумай свою программу, которая зависает по новой причине, и дай соседу починить.</div></div><div class="col"><div class="tabs"><div class="tabbar"></div>
+<div class="tab" data-tab="Программа A"><script type="text/x-python" data-file="программа A">
+lives = 3
+while lives > 0:
+    print(f"Жизней: {lives}")
+print("Игра окончена")
+</script></div>
+<div class="tab" data-tab="Программа B"><script type="text/x-python" data-file="программа B">
+level = 1
+while level <= 5:
+    print(f"Уровень {level}")
+    level -= 1
+</script></div>
+<div class="tab" data-tab="Программа C"><script type="text/x-python" data-file="программа C">
+coins = 0
+while coins != 25:
+    coins += 10
+    print(f"Монет: {coins}")
+</script></div>
+</div></div></div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Задание 1: результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 1 · Задание 1</div>
+<h2>Задание 1: что должно получиться</h2>
+<div class="two w">
+<div class="col">
+<script type="text/x-console" data-title="программа A">Жизней: 3
+Жизней: 2
+Жизней: 1
+Игра окончена</script>
+<script type="text/x-console" data-title="программа B">Уровень 1
+Уровень 2
+Уровень 3
+Уровень 4
+Уровень 5</script>
+<script type="text/x-console" data-title="программа C">Монет: 10
+Монет: 20
+Монет: 30</script>
+</div>
+<div class="notes"><h3>Проверь себя</h3><ul><li>Каждая программа заканчивается сама, без Ctrl+C.</li><li>В C подумай: какое условие честнее, если монеты прибавляются по 10?</li><li>Объясни соседу, почему было бесконечно.</li></ul></div>
+</div>
+</section>
+<section class="slide" data-title="Задание 2: табло стадиона">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 1 · Задание 2 · 9 минут</div><div class="timer" data-min="9"></div></div>
+<h2>Задание 2: «Табло стадиона»</h2>
+<div class="two"><div class="task"><p class="story">Три табло для спортивного праздника.</p><ul><li>Первое: места от 1 до 10 в одну строку.</li><li>Второе: чётные номера от 2 до 20.</li><li>Третье: обратный отсчёт от 10 до 0 <b>включительно</b> с шагом 2.</li></ul><p><b>Что понадобится:</b> for и range(start, stop, step) — 1.5; print(…, end=" ") — 1.2</p></div><div class="col"><div class="notes tip"><h3>Подсказка</h3><p>Каждое табло — свой цикл <code>for</code> и <code>print()</code> после него. Stop не входит: где остановиться, чтобы 0 попал?</p></div>
+<div class="star"><b>★ Успел раньше?</b> Старт, стоп и шаг вводит пользователь.</div></div></div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Задание 2: результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 1 · Задание 2</div>
+<h2>Задание 2: что должно получиться</h2>
+<div class="two w">
+<script type="text/x-console" data-title="пример работы">1 2 3 4 5 6 7 8 9 10 
+2 4 6 8 10 12 14 16 18 20 
+10 8 6 4 2 0</script>
+<div class="notes"><h3>Проверь себя</h3><ul><li>Первое табло заканчивается на 10, а не на 9.</li><li>В третьем есть 0.</li><li>Каждое табло — на своей строке.</li></ul></div>
+</div>
+</section>
+<section class="slide" data-title="Задание 3: ник по буквам">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 1 · Задание 3 · 9 минут</div><div class="timer" data-min="9"></div></div>
+<h2>Задание 3: «Ник по буквам»</h2>
+<div class="two"><div class="task"><p class="story">Разбираем ник на символы.</p><ul><li>Спрашивает: «Ник: ».</li><li>Печатает каждый символ с номером: «1: F», «2: o» …</li><li>В конце: «Символов: …».</li></ul><p><b>Что понадобится:</b> for по строке — 1.5; счётчик — 1.5; input() — 1.2</p></div><div class="col"><div class="notes tip"><h3>Подсказка</h3><p>Номер — это счётчик: до цикла 0, в цикле +1.</p></div>
+<div class="star"><b>★ Успел раньше?</b> Пробел не нумеруй, а пиши вместо него «пробел».</div></div></div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Задание 3: результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 1 · Задание 3</div>
+<h2>Задание 3: что должно получиться</h2>
+<div class="two w">
+<script type="text/x-console" data-title="пример работы">Ник: [[Fox_7]]
+1: F
+2: o
+3: x
+4: _
+5: 7
+Символов: 5</script>
+<div class="notes"><h3>Проверь себя</h3><ul><li>Ник «a b» — «Символов: 3»: пробел тоже символ.</li><li>Номера идут с 1, а не с 0.</li></ul></div>
+</div>
+</section>
+<section class="slide" data-title="★★ Число-перевёртыш">
+<div class="eyebrow"><span class="kind prac">★★ Для сильных</span> Урок 1</div>
+<h2>★★ «Число-перевёртыш»</h2>
+<div class="two">
+<div class="col">
+<div class="task"><ul>
+<li>Спрашивает: «Число: » — целое число больше 0.</li>
+<li>Выводит его цифры в обратном порядке: «Наоборот: …».</li>
+<li>Без строк: только арифметика и <code>while</code>.</li>
+</ul><p>Над чем подумать: как получить последнюю цифру и как её «отрезать»?</p></div>
+<details class="ans tipd"><summary>Подсказка</summary><div class="body"><p>Что дают <code>12345 % 10</code> и <code>12345 // 10</code> (тема 1.3)? Как из 5 и следующей цифры 4 собрать 54?</p></div></details>
+</div>
+<div class="col"><span class="ptitle">Пример результата</span>
+<script type="text/x-console">Число: [[12345]]
+Наоборот: 54321</script></div>
+</div>
+</section>
+<section class="slide" data-title="Задание 4: шагомер">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 2 · Задание 4 · 12 минут</div><div class="timer" data-min="12"></div></div>
+<h2>Задание 4: «Шагомер за неделю»</h2>
+<div class="two"><div class="task"><p class="story">Утилита для тех, кто следит за шагами.</p><ul><li>7 раз спрашивает: «Шаги в день 1: » … «Шаги в день 7: ».</li><li>Выводит: «Всего шагов: …», «В среднем за день: …» (целое).</li><li>И сколько дней было не меньше 10 000 шагов: «Дней от 10 000 шагов: …».</li></ul><p><b>Что понадобится:</b> for и range — 1.5; накопитель и счётчик — 1.5; if — 1.4; // — 1.3</p></div><div class="col"><div class="notes tip"><h3>Подсказка</h3><p>Накопитель для суммы и счётчик для «хороших» дней — до цикла. Среднее считается после цикла.</p></div>
+<div class="star"><b>★ Успел раньше?</b> Найди лучший день недели: «Лучший день: 7».</div></div></div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Задание 4: результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 2 · Задание 4</div>
+<h2>Задание 4: что должно получиться</h2>
+<div class="two w">
+<div class="term" data-prog="steps" data-title="пример работы"><script type="text/x-sample">Шаги в день 1: [[8500]]
+Шаги в день 2: [[12000]]
+Шаги в день 3: [[10000]]
+Шаги в день 4: [[6400]]
+Шаги в день 5: [[11200]]
+Шаги в день 6: [[9900]]
+Шаги в день 7: [[15000]]
+Всего шагов: 73000
+В среднем за день: 10428
+Дней от 10 000 шагов: 4</script></div>
+<div class="notes"><h3>Проверь себя</h3><ul><li>Ровно 10 000 считается: «не меньше».</li><li>Все дни по 0 — «Всего шагов: 0», «Дней от 10 000 шагов: 0».</li><li>Вопрос задаётся ровно 7 раз.</li></ul></div>
+</div>
+</section>
+<section class="slide" data-title="Задание 5: слово-пароль">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 2 · Задание 5 · 13 минут</div><div class="timer" data-min="13"></div></div>
+<h2>Задание 5: «Слово-пароль»</h2>
+<div class="two"><div class="task"><p class="story">Пароль задай в начале программы константой, например <code>SECRET = "кактус"</code>.</p><ul><li>Спрашивает «Пароль: », пока не угадают; неверно — «Неверно».</li><li>Пустой ввод — «Введи хоть что-нибудь», попытка <b>не считается</b>.</li><li>«сдаюсь» — «Пароль был: …» и выход из цикла.</li><li>Угадал — «Верно! Попыток: …».</li></ul><p><b>Что понадобится:</b> while — 1.5; break и continue — 1.5; счётчик — 1.5</p></div><div class="col"><div class="notes tip"><h3>Подсказка</h3><p>Пустой ввод и «сдаюсь» проверяй сразу после <code>input</code>. После цикла узнай, угадал ли игрок: сравни последний ввод с паролем.</p></div>
+<div class="star"><b>★ Успел раньше?</b> После 3-й неверной попытки программа подсказывает: «Первая буква: к».</div></div></div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Задание 5: результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 2 · Задание 5</div>
+<h2>Задание 5: что должно получиться</h2>
+<div class="two w">
+<div class="term" data-prog="secret" data-title="пример работы"><script type="text/x-sample">Пароль: [[роза]]
+Неверно
+Пароль: [[]]
+Введи хоть что-нибудь
+Пароль: [[кактус]]
+Верно! Попыток: 2</script></div>
+<div class="notes"><h3>Проверь себя</h3><ul><li>Пустой ввод не увеличивает число попыток.</li><li>«сдаюсь» — программа показывает пароль и заканчивается, без «Верно!».</li><li>Программа не зависает — проверь все три пути.</li></ul></div>
+</div>
+</section>
+<section class="slide" data-title="Задание 6: цензор чата">
+<div class="prow"><div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 2 · Задание 6 · 13 минут</div><div class="timer" data-min="13"></div></div>
+<h2>Задание 6: «Цензор чата»</h2>
+<div class="two"><div class="task"><p class="story">Фильтр для сообщений в чате.</p><ul><li>Спрашивает: «Сообщение: ».</li><li>Печатает его в одну строку <b>без цифр</b>.</li><li>На символе «#» печатает «…дальше скрыто» и останавливается.</li><li>В конце: «Скрыто цифр: …».</li></ul><p><b>Что понадобится:</b> for по строке — 1.5; .isdigit() — 1.2; break и continue — 1.5; счётчик — 1.5</p></div><div class="col"><div class="notes tip"><h3>Подсказка</h3><p>Подумай о порядке проверок в цикле: сначала «#», потом цифра, потом обычный символ. Для печати подряд — <code>end=""</code>.</p></div>
+<div class="star"><b>★ Успел раньше?</b> Несколько пробелов подряд печатай одним пробелом.</div></div></div>
+<p class="stuck">Застрял — 15 минут ищешь сам, потом спрашиваешь: что делал, что ожидал, что получил.</p>
+</section>
+<section class="slide" data-title="Задание 6: результат">
+<div class="eyebrow"><span class="kind prac">✎ Практика · база</span> Урок 2 · Задание 6</div>
+<h2>Задание 6: что должно получиться</h2>
+<div class="two w">
+<script type="text/x-console" data-title="пример работы">Сообщение: [[Встречаемся в 15:30 у входа #секрет]]
+Встречаемся в : у входа …дальше скрыто
+Скрыто цифр: 4</script>
+<div class="notes"><h3>Проверь себя</h3><ul><li>Цифры после «#» не считаются: до них цикл не дошёл.</li><li>Сообщение без цифр и «#» печатается целиком, «Скрыто цифр: 0».</li><li>Объясни соседу, где в твоём коде break, а где continue и почему.</li></ul></div>
+</div>
+</section>
+<section class="slide" data-title="★★ Самая длинная серия">
+<div class="eyebrow"><span class="kind prac">★★ Для сильных</span> Урок 2</div>
+<h2>★★ «Самая длинная серия»</h2>
+<div class="two">
+<div class="col">
+<div class="task"><ul>
+<li>Спрашивает результаты матчей строкой: В — победа, П — поражение.</li>
+<li>Выводит самую длинную серию побед подряд.</li>
+</ul><p>Над чем подумать: что происходит с текущей серией после поражения?</p></div>
+<details class="ans tipd"><summary>Подсказка</summary><div class="body"><p>Понадобятся два счётчика: «текущая серия» и «лучшая серия». Когда текущая обнуляется, а когда обновляется лучшая?</p></div></details>
+</div>
+<div class="col"><span class="ptitle">Пример результата</span>
+<script type="text/x-console">Результаты (В и П): [[ВВПВВВПВ]]
+Самая длинная серия побед: 3</script></div>
+</div>
+</section>
+<section class="slide" data-title="Мини-проект: касса кинозала">
+<div class="prow"><div class="eyebrow"><span class="kind prac">★ Мини-проект</span> Урок 3 · 25–30 минут</div><div class="timer" data-min="25"></div></div>
+<h2>Мини-проект: «Касса кинозала»</h2>
+<div class="two w">
+<div class="term" data-prog="kassa" data-title="от запуска до конца"><script type="text/x-sample">Сколько билетов? [[3]]
+Билет: место 1
+Билет: место 2
+Билет: место 3
+Осталось мест: 17
+Сколько билетов? [[25]]
+Осталось только 17
+Сколько билетов? [[2]]
+Билет: место 4
+Билет: место 5
+Осталось мест: 15
+Сколько билетов? [[0]]
+Касса закрыта
+Продано билетов: 5
+Выручка: 1750 руб.</script></div>
+<div class="notes"><p>На сеанс <b>20 мест</b>, билет — <b>350 рублей</b>. Касса продаёт билеты, пока есть места, и печатает каждый билет с номером места.</p><p>Просят больше, чем осталось, — касса предупреждает. 0 — касса закрывается и показывает итог.</p></div>
+</div>
+</section>
+<section class="slide" data-title="Мини-проект: что умеет">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> Урок 3</div>
+<h2>Что умеет программа</h2>
+<div class="four" style="grid-template-columns:1fr 1fr">
+<div class="card"><span class="k">Продаёт</span><p>Спрашивает, сколько билетов, пока есть места.</p></div>
+<div class="card"><span class="k">Печатает билеты</span><p>Каждый билет — с номером места, места не повторяются.</p></div>
+<div class="card"><span class="k">Не ломается</span><p>Просят больше, чем осталось, — говорит, сколько мест есть.</p></div>
+<div class="card"><span class="k">Считает</span><p>В конце — сколько продано и сколько денег в кассе.</p></div>
+</div>
+<div class="key">Это пригодится в Проекте 1: неправильный ввод не ломает программу.</div>
+</section>
+<section class="slide" data-title="Мини-проект: план">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> Урок 3</div>
+<h2>План по шагам</h2>
+<div class="tbl"><table>
+<tr><th class="c">Шаг</th><th>Что сделать</th><th>Что понадобится</th><th>Как проверить</th></tr>
+<tr><td class="c"><b>1</b></td><td>Цикл, пока есть места: спроси «Сколько билетов? », уменьши свободные места, выведи «Осталось мест: …»</td><td>while — 1.5</td><td>Введи 5 и 15 — «Осталось мест: 15», потом «Осталось мест: 0», и программа закончилась</td></tr>
+<tr><td class="c"><b>2</b></td><td>Счётчик проданных и выручка; после цикла — итог</td><td>счётчик, накопитель — 1.5</td><td>Введи 5 и 15 — «Продано билетов: 20», «Выручка: 7000 руб.»</td></tr>
+<tr><td class="c"><b>3</b></td><td>0 — «Касса закрыта» и выход; больше, чем осталось, — «Осталось только …» и следующий круг</td><td>break, continue — 1.5</td><td>Введи 25 — «Осталось только 20»; потом 0 — «Касса закрыта» и итог</td></tr>
+<tr><td class="c"><b>4</b></td><td>Перед уменьшением мест напечатай билеты: «Билет: место …»</td><td>for и range — 1.5</td><td>Введи 3 — места 1, 2, 3; потом 2 — места 4 и 5</td></tr>
+</table></div>
+<div class="key">Проверяй после каждого шага, а не в конце.</div>
+</section>
+<section class="slide" data-title="Мини-проект: заготовка">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> Урок 3</div>
+<h2>Заготовка</h2>
+<div class="two w">
+<script type="text/x-python" data-file="main.py">
+SEATS = 20
+PRICE = 350
+seats_left = SEATS
+# Шаг 2: счётчик проданных и выручка — до цикла
+
+# Шаг 1: цикл, пока есть свободные места
+#     спроси «Сколько билетов? »
+#     Шаг 3: 0 — «Касса закрыта» и выйти из цикла
+#     Шаг 3: больше, чем осталось, — «Осталось только …»
+#            и сразу к следующему кругу
+#     Шаг 4: напечатай билеты с номерами мест
+#     уменьши свободные места, «Осталось мест: …»
+# После цикла: «Продано билетов: …», «Выручка: … руб.»
+</script>
+<div class="notes"><ul>
+<li>Комментарии с отступом — то, что внутри цикла.</li>
+<li>Номер первого места в покупке — на 1 больше, чем уже продано. Каким тогда будет <code>range</code>?</li>
+<li>Проверки 0 и «слишком много» ставь сразу после ввода.</li>
+<li>Ошибка — читай traceback снизу вверх. Застрял — 15 минут ищешь сам, потом спрашиваешь.</li>
+</ul></div>
+</div>
+</section>
+<section class="slide" data-title="Мини-проект: готово, если…">
+<div class="eyebrow"><span class="kind prac">★ Мини-проект</span> Урок 3</div>
+<h2>Готово, если…</h2>
+<div class="two">
+<div class="notes"><ul>
+<li>Купили 20 билетов сразу — 20 билетов, «Осталось мест: 0», итог без лишних вопросов.</li>
+<li>Попросили 25 — «Осталось только 20», места не изменились.</li>
+<li>Ввели 0 — «Касса закрыта» и итог.</li>
+<li>Номера мест не повторяются от покупки к покупке.</li>
+<li>Ты можешь <b>объяснить каждую строку</b> своего кода.</li>
+</ul></div>
+<div class="col">
+<div class="star"><b>★ Скидка.</b> От 5 билетов в одной покупке — скидка 10 %.<br><span class="legend">Станет: 5 билетов — «Выручка: 1575 руб.»</span></div>
+<div class="star"><b>★★ Ряд и место.</b> В ряду по 10 мест: на билете ряд и место в ряду. Пригодятся <code>//</code> и <code>%</code>.<br><span class="legend">Станет: «Билет: ряд 2, место 1»</span></div>
+</div>
+</div>
+</section>
+<section class="slide" data-title="Если всё готово: FizzBuzz">
+<div class="eyebrow"><span class="kind prac">Если всё готово</span> 10+ минут</div>
+<h2>Челлендж: «FizzBuzz и свои правила»</h2>
+<div class="two">
+<div class="task"><p>Выведи числа от 1 до 100. Вместо числа, которое делится на 3, — <b>Fizz</b>, на 5 — <b>Buzz</b>, на 3 и на 5 — <b>FizzBuzz</b>.</p>
+<p>Потом свои правила: «Buzz» на 7 вместо 5; «Fizz» и для чисел, в записи которых есть цифра 3 — перебери <code>str(n)</code> по символам (тема 1.2).</p></div>
+<script type="text/x-console" data-title="первые 10 чисел">1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz</script>
+</div>
+</section>
+<section class="slide" data-title="Итоги">
+<div class="hero">
+<div class="eyebrow">Итоги практики</div>
+<h1>Теперь я умею</h1>
+<div class="goals"><ul>
+<li>находить и чинить <b>бесконечный цикл</b>;</li>
+<li>считать и копить в цикле: <b>счётчик и накопитель</b>;</li>
+<li>подбирать <b>range</b> так, чтобы нужные числа точно попали;</li>
+<li>разбирать строку по символам;</li>
+<li>выходить из цикла через <b>break</b> и пропускать шаги через <b>continue</b>.</li>
+</ul></div>
+<div class="meta"><span>Дальше: занятие 2 темы 1.5 — вложенные циклы, random, else и while True</span></div>
+</div>
+</section>
+
+  </main>
+  <footer class="nav">
+    <div class="bar" id="bar"></div>
+    <button class="btn" id="prev" type="button">← Назад</button>
+    <span class="hint">← → листать · ↑ ↓ прокрутка · F — полный экран · Ctrl+P — PDF</span>
+    <span class="count" id="count">1 / 1</span>
+    <button class="btn" id="next" type="button">Вперёд →</button>
+  </footer>
+</div>
+<script>
+/* ===== ЗАНЯТИЕ: программы для консолей с запуском и особые виджеты. Меняется в каждой презентации. =====
+   progs.имя = async (io, PY) => {...} — имя совпадает с data-prog у <div class="term">.
+   io.print(текст)            — напечатать строку (как print);
+   await io.input(подсказка)  — спросить ввод (как input), вернёт строку;
+   io.int(строка)             — как int(): на букве печатает ValueError и останавливает программу;
+   await io.sleep(мс)         — пауза, чтобы вывод шёл постепенно.
+   PY.rnd(a, b) — как random.randint(a, b); PY.pick(строка) — как random.choice(строка).
+   Формат вывода должен совпадать с настоящим запуском Python (он лежит в x-sample).
+   init(PY) — место для особых виджетов занятия (ползунки, кубик и т. п.). PY.$(id) — найти элемент.
+   beforePrint(PY) — перед печатью в PDF: дорисовать виджеты в готовом состоянии (кубик брошен, 600 бросков сделаны).
+   afterPrint(PY) — после печати (можно не писать). */
+window.LESSON = {
+  progs: {
+    async steps(io){
+      let total = 0;
+      let goodDays = 0;
+      for (let day = 1; day < 8; day++){
+        const steps = io.int(await io.input(`Шаги в день ${day}: `));
+        total += steps;
+        if (steps >= 10000) goodDays += 1;
+      }
+      io.print(`Всего шагов: ${total}`);
+      io.print(`В среднем за день: ${Math.floor(total / 7)}`);
+      io.print(`Дней от 10 000 шагов: ${goodDays}`);
+    },
+    async secret(io){
+      const SECRET = 'кактус';
+      let tries = 0;
+      let guess = '';
+      while (guess !== SECRET){
+        guess = await io.input('Пароль: ');
+        if (guess === ''){ io.print('Введи хоть что-нибудь'); continue; }
+        if (guess === 'сдаюсь'){ io.print(`Пароль был: ${SECRET}`); break; }
+        tries += 1;
+        if (guess !== SECRET) io.print('Неверно');
+      }
+      if (guess === SECRET) io.print(`Верно! Попыток: ${tries}`);
+    },
+    async kassa(io){
+      const SEATS = 20, PRICE = 350;
+      let seatsLeft = SEATS, sold = 0, revenue = 0;
+      while (seatsLeft > 0){
+        const count = io.int(await io.input('Сколько билетов? '));
+        if (count === 0){ io.print('Касса закрыта'); break; }
+        if (count > seatsLeft){ io.print(`Осталось только ${seatsLeft}`); continue; }
+        for (let seat = sold + 1; seat < sold + count + 1; seat++) io.print(`Билет: место ${seat}`);
+        sold += count;
+        revenue += count * PRICE;
+        seatsLeft -= count;
+        io.print(`Осталось мест: ${seatsLeft}`);
+      }
+      io.print(`Продано билетов: ${sold}`);
+      io.print(`Выручка: ${revenue} руб.`);
+    }
+  },
+  init(PY){
+  },
+  beforePrint(PY){
+  }
+};
+
+</script>
+<script>
+/* ===== ЯДРО ШАБЛОНА: не менять. Компоненты: код, вывод, консоль с запуском, трассировка, вкладки, таймер, навигация, печать. ===== */
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=s=>s[Math.floor(Math.random()*s.length)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const trimBlock=s=>s.replace(/^\n+|\s+$/g,'');
+const printHooks=[]; /* что сделать перед печатью и после */
+
+/* ---------- подсветка Python ---------- */
+const KW=new Set('def async await while for in if elif else return class import from True False None and or not global lambda pass break continue as with try except finally is'.split(' '));
+const BI=new Set('print range input int str len float round abs min max sum list dict set tuple sorted enumerate open type bool'.split(' '));
+const RE=/(#.*$)|(f?"(?:[^"\\]|\\.)*"|f?'(?:[^'\\]|\\.)*')|\b([A-Za-z_][A-Za-z_0-9]*)\b|\b(\d+(?:\.\d+)?)\b/g;
+function hlLine(src){
+  let out='',last=0,m; RE.lastIndex=0;
+  while((m=RE.exec(src))){
+    out+=esc(src.slice(last,m.index));
+    if(m[1]) out+='<span class="tk-com">'+esc(m[1])+'</span>';
+    else if(m[2]){ let s=esc(m[2]); if(m[2][0]==='f') s=s.replace(/\{[^}]*\}/g,x=>'<span class="tk-fx">'+x+'</span>'); out+='<span class="tk-str">'+s+'</span>'; }
+    else if(m[3]) out+=KW.has(m[3])?'<span class="tk-kw">'+m[3]+'</span>':BI.has(m[3])?'<span class="tk-bi">'+m[3]+'</span>':esc(m[3]);
+    else if(m[4]) out+='<span class="tk-num">'+m[4]+'</span>';
+    last=RE.lastIndex;
+  }
+  return out+esc(src.slice(last));
+}
+function codeLines(src,opt){
+  opt=opt||{};
+  const set=a=>new Set(String(a||'').split(',').filter(Boolean).map(Number));
+  const hl=set(opt.hl),bad=set(opt.bad),good=set(opt.good);
+  return src.split('\n').map((l,i)=>{const n=i+1;const c=hl.has(n)?' hl':bad.has(n)?' bad':good.has(n)?' good':'';return '<span class="ln'+c+'">'+(hlLine(l)||' ')+'</span>';}).join('');
+}
+function codeBox(src,d){
+  const wrap=document.createElement('div'); wrap.className='code';
+  wrap.innerHTML='<div class="ch"><span class="lbl"><i>КОД</i> '+esc(d.file||'main.py')+'</span><span class="acts"><button class="mini cp" type="button">Копировать</button></span></div><pre class="py'+(d.nonum!==undefined?' nonum':'')+'">'+codeLines(src,d)+'</pre>';
+  wrap.querySelector('.cp').addEventListener('click',e=>{
+    const b=e.currentTarget; const ok=()=>{b.textContent='Скопировано ✓';setTimeout(()=>b.textContent='Копировать',1400);};
+    try{navigator.clipboard.writeText(src).then(ok,()=>{b.textContent='Не вышло';});}catch(err){b.textContent='Не вышло';}
+  });
+  return wrap;
+}
+/* консольный текст: [[ввод]] — ввод пользователя; блок ошибки — строки с XxxError и ниже красные */
+function consoleHTML(src,isErr){
+  let lines=src.split('\n').map(l=>esc(l).replace(/\[\[(.*?)\]\]/g,(m,v)=>'<span class="u">'+(v||'&nbsp;')+'</span>'));
+  if(isErr){ const cut=lines.findIndex(l=>/^\w+(Error|Exception)\b/.test(l)); lines=lines.map((l,i)=>(cut>=0&&i>=cut)?'<span class="eb">'+l+'</span>':'<span class="e">'+l+'</span>'); }
+  return lines.join('\n');
+}
+
+/* ---------- трассировка: <div class="tracer"> + code + json ---------- */
+document.querySelectorAll('.tracer').forEach(box=>{
+  const codeEl=box.querySelector('script[type="text/x-trace-code"]'), dataEl=box.querySelector('script[type="application/json"]');
+  const src=trimBlock(codeEl.textContent), data=JSON.parse(dataEl.textContent), steps=data.steps, vars=data.vars;
+  box.innerHTML='';
+  const left=document.createElement('div'); left.className='col';
+  const right=document.createElement('div'); right.className='col';
+  const cb=codeBox(src,codeEl.dataset); left.appendChild(cb);
+  left.insertAdjacentHTML('beforeend','<div class="vars">'+vars.map(v=>'<div class="var"><span>'+esc(v)+'</span><b data-v="'+esc(v)+'">—</b></div>').join('')+'<div class="var"><span>шаг</span><b data-n>0</b></div></div><div class="msg">Жми «Шаг →».</div><div class="row"><button class="btn" data-a="prev" type="button">← Назад</button><button class="btn pri" data-a="next" type="button">Шаг →</button><button class="btn" data-a="auto" type="button">▶ Авто</button><button class="btn" data-a="reset" type="button">Сброс</button></div>');
+  right.innerHTML='<div class="con"><div class="ch"><span class="lbl"><i>ВЫВОД</i></span></div><div class="out"></div></div><div class="tbl"><table><tr><th class="c">№</th>'+vars.map(v=>'<th class="c">'+esc(v)+'</th>').join('')+'<th>Что произошло</th></tr></table></div>';
+  box.append(left,right);
+  const lines=[...cb.querySelectorAll('.ln')], out=right.querySelector('.out'), tbl=right.querySelector('table'), msg=left.querySelector('.msg');
+  const rows=[]; let tn=0;
+  steps.forEach(st=>{ if(st.t){ st.tr=++tn; const tr=document.createElement('tr'); if(st.dim) tr.className='nl'; tr.innerHTML='<td class="c">'+tn+'</td>'+vars.map(v=>'<td class="c">'+(st.v&&st.v[v]!==undefined&&st.v[v]!==null?esc(st.v[v]):'—')+'</td>').join('')+'<td>'+esc(st.t)+'</td>'; tbl.appendChild(tr); rows.push(tr);} });
+  let k=-1, iv=null;
+  const btn=a=>left.querySelector('[data-a="'+a+'"]');
+  function draw(){
+    const st=k>=0?steps[k]:null;
+    lines.forEach((l,i)=>l.classList.toggle('hl',!!st&&st.l===i+1));
+    vars.forEach(v=>{left.querySelector('[data-v="'+v+'"]').textContent=st&&st.v&&st.v[v]!==undefined&&st.v[v]!==null?st.v[v]:'—';});
+    left.querySelector('[data-n]').textContent=k+1; msg.textContent=st?st.m:'Жми «Шаг →».';
+    let o=''; for(let i=0;i<=k;i++) if(steps[i].o) o+=steps[i].o; out.textContent=o;
+    rows.forEach((r,i)=>r.classList.toggle('on',!!st&&st.tr===i+1));
+    btn('prev').disabled=k<0; btn('next').disabled=k>=steps.length-1;
+  }
+  const stop=()=>{clearInterval(iv);iv=null;btn('auto').textContent='▶ Авто';};
+  btn('next').addEventListener('click',()=>{stop();if(k<steps.length-1){k++;draw();}});
+  btn('prev').addEventListener('click',()=>{stop();if(k>=0){k--;draw();}});
+  btn('reset').addEventListener('click',()=>{stop();k=-1;draw();});
+  btn('auto').addEventListener('click',()=>{ if(iv){stop();return;} if(k>=steps.length-1) k=-1; btn('auto').textContent='❚❚ Пауза'; iv=setInterval(()=>{k++;draw(); if(k>=steps.length-1) stop();},900); });
+  let kSaved=-1; printHooks.push({before(){stop();kSaved=k;k=steps.length-1;draw();},after(){k=kSaved;draw();}});
+  draw();
+});
+
+/* ---------- код и вывод ---------- */
+document.querySelectorAll('script[type="text/x-python"]').forEach(el=>{ el.replaceWith(codeBox(trimBlock(el.textContent),el.dataset)); });
+document.querySelectorAll('script[type="text/x-console"]').forEach(el=>{
+  const isErr=el.dataset.kind==='error';
+  const wrap=document.createElement('div'); wrap.className='con'+(isErr?' err':'');
+  wrap.innerHTML='<div class="ch"><span class="lbl"><i>'+(isErr?'ОШИБКА':'ВЫВОД')+'</i> '+esc(el.dataset.title||'')+'</span></div><div class="out">'+consoleHTML(trimBlock(el.textContent),isErr)+'</div>';
+  el.replaceWith(wrap);
+});
+
+/* ---------- вкладки ---------- */
+document.querySelectorAll('.tabs').forEach(t=>{
+  const bar=t.querySelector('.tabbar'), tabs=[...t.querySelectorAll(':scope>.tab')];
+  tabs.forEach((tb,i)=>{ const b=document.createElement('button'); b.type='button'; b.textContent=(i+1)+'. '+tb.dataset.tab; b.addEventListener('click',()=>act(i)); bar.appendChild(b); });
+  function act(i){ tabs.forEach((tb,k)=>tb.hidden=k!==i); [...bar.children].forEach((b,k)=>b.classList.toggle('on',k===i)); }
+  act(0);
+});
+
+/* ---------- консоль с запуском: .term[data-prog] + пример настоящего запуска (x-sample) ---------- */
+class Stop extends Error{}
+const LESSON=window.LESSON||{progs:{}};
+function makeTerm(box){
+  const sampleEl=box.querySelector('script[type="text/x-sample"]');
+  const sample=sampleEl?trimBlock(sampleEl.textContent):'';
+  const prog=LESSON.progs&&LESSON.progs[box.dataset.prog];
+  box.innerHTML='<div class="ch"><span class="lbl"><i>ВЫВОД</i> '+esc(box.dataset.title||'')+'</span><span class="acts">'+(prog?'<button class="mini run" type="button">▶ Запустить</button><button class="mini clr" type="button">Очистить</button>':'')+'</span></div><div class="out"></div>';
+  const out=box.querySelector('.out'); let run=0;
+  const showSample=()=>{ out.innerHTML=sample?consoleHTML(sample,false):'<span class="ph">Нажми «▶ Запустить».</span>'; };
+  showSample();
+  if(!prog) return;
+  const add=html=>{out.insertAdjacentHTML('beforeend',html);out.scrollTop=out.scrollHeight;};
+  function io(id){
+    const alive=()=>{if(id!==run) throw new Stop();};
+    return {
+      print(s,cls){alive();add((cls?'<span class="'+cls+'">'+esc(s)+'</span>':esc(s))+'\n');},
+      async sleep(ms){await sleep(ms);alive();},
+      input(prompt){alive();
+        return new Promise((res,rej)=>{
+          add(esc(prompt)); const inp=document.createElement('input'); inp.className='tin'; inp.type='text'; inp.autocomplete='off'; inp.spellcheck=false;
+          out.appendChild(inp); try{inp.focus({preventScroll:true});}catch(e){}
+          const chk=setInterval(()=>{if(id!==run){clearInterval(chk);rej(new Stop());}},200);
+          inp.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Enter'){ e.preventDefault(); clearInterval(chk); const v=inp.value; inp.replaceWith(Object.assign(document.createElement('span'),{className:'u',textContent:v||' '})); add('\n'); if(id!==run) rej(new Stop()); else res(v);} });
+        });
+      },
+      int(s){const t=String(s).trim(); if(!/^[+-]?\d+$/.test(t)){alive(); add('<span class="e">Traceback (most recent call last):\n  File "main.py", line 1, in &lt;module&gt;\n</span><span class="eb">ValueError: invalid literal for int() with base 10: \''+esc(s)+'\'</span>\n'); throw new Stop('err');} return parseInt(t,10);}
+    };
+  }
+  async function start(){
+    const id=++run; out.innerHTML='';
+    try{ await prog(io(id),PY); if(id===run) add('<span class="fin">— программа завершена —</span>'); }
+    catch(e){ if(!(e instanceof Stop)) console.error(e); else if(e.message==='err'&&id===run) add('<span class="fin">— программа упала с ошибкой —</span>'); }
+  }
+  box.querySelector('.run').addEventListener('click',start);
+  box.querySelector('.clr').addEventListener('click',()=>{run++;out.innerHTML='<span class="ph">Нажми «▶ Запустить».</span>';});
+}
+const PY={$,esc,rnd,pick,sleep,codeLines,consoleHTML};
+document.querySelectorAll('.term').forEach(makeTerm);
+
+/* ---------- таймер практики ---------- */
+document.querySelectorAll('.timer[data-min]').forEach(t=>{
+  const total=+t.dataset.min*60; let left=total, iv=null;
+  t.innerHTML='<span class="tv"></span><button class="btn" type="button">▶ Старт</button><button class="btn" type="button" title="Сбросить">↺</button>';
+  const tv=t.querySelector('.tv'), [go,rs]=t.querySelectorAll('button');
+  const draw=()=>{tv.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0'); t.classList.toggle('done',left===0);};
+  go.addEventListener('click',()=>{ if(iv){clearInterval(iv);iv=null;go.textContent='▶ Старт';return;} if(left===0) left=total; go.textContent='❚❚ Пауза'; iv=setInterval(()=>{left=Math.max(0,left-1);draw(); if(!left){clearInterval(iv);iv=null;go.textContent='▶ Старт';}},1000); });
+  rs.addEventListener('click',()=>{clearInterval(iv);iv=null;left=total;go.textContent='▶ Старт';draw();});
+  draw();
+});
+
+/* ---------- особые виджеты занятия ---------- */
+try{ if(LESSON.init) LESSON.init(PY); }catch(e){ console.error(e); }
+
+/* ---------- слайды, навигация, тема, масштаб ---------- */
+const slides=[...document.querySelectorAll('main>.slide')];
+const jump=$('jump'),prev=$('prev'),next=$('next'),count=$('count'),main=$('main'),bar=$('bar');
+slides.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+(s.dataset.title||'');jump.appendChild(o);});
+let cur=0;
+function show(i,fromHash){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>{s.hidden=k!==cur;s.classList.toggle('enter',k===cur);});
+  jump.value=cur; count.textContent=(cur+1)+' / '+slides.length; bar.style.width=((cur+1)/slides.length*100)+'%';
+  prev.disabled=cur===0; next.disabled=cur===slides.length-1; main.scrollTop=0;
+  if(!fromHash){try{history.replaceState(null,'','#s'+(cur+1));}catch(e){}}
+}
+function fromHash(){const m=/^#s(\d+)$/.exec(location.hash);show(m?parseInt(m[1],10)-1:0,true);}
+prev.addEventListener('click',()=>show(cur-1));
+next.addEventListener('click',()=>show(cur+1));
+jump.addEventListener('change',()=>show(parseInt(jump.value,10)));
+window.addEventListener('hashchange',fromHash);
+function fsToggle(){try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){}}
+$('fs').addEventListener('click',fsToggle);
+document.addEventListener('keydown',e=>{
+  const t=e.target; if(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA'){ if(e.key==='Escape') t.blur(); return; }
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();show(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1);}
+  else if(e.key==='ArrowDown'){main.scrollBy({top:120,behavior:'smooth'});e.preventDefault();}
+  else if(e.key==='ArrowUp'){main.scrollBy({top:-120,behavior:'smooth'});e.preventDefault();}
+  else if(e.key.length===1&&'fFаА'.includes(e.key)){fsToggle();}
+});
+const root=document.documentElement;
+function setTheme(t){root.dataset.theme=t; store.set('py-theme',t);}
+setTheme(store.get('py-theme')||'dark');
+$('theme').addEventListener('click',()=>setTheme(root.dataset.theme==='light'?'dark':'light'));
+let z=parseFloat(store.get('py-zoom2'))||1;
+function setZoom(v){z=Math.max(.7,Math.min(1.5,Math.round(v*10)/10)); main.style.zoom=z; store.set('py-zoom2',z);}
+setZoom(z);
+$('zp').addEventListener('click',()=>setZoom(z+.1)); $('zm').addEventListener('click',()=>setZoom(z-.1));
+/* печать (Ctrl+P → PDF): подсказки открыты, итоговый код скрыт; ответы — по кнопке «PDF: …» */
+let withAns=store.get('py-pdf-ans')==='1';
+const pans=$('pans');
+const drawPans=()=>{pans.textContent=withAns?'PDF: с ответами':'PDF: без ответов';};
+pans.addEventListener('click',()=>{withAns=!withAns;store.set('py-pdf-ans',withAns?'1':'0');drawPans();});
+drawPans();
+let saved=[], printing=false;
+window.addEventListener('beforeprint',()=>{
+  if(printing) return; printing=true;
+  saved=[...document.querySelectorAll('details')].map(d=>[d,d.open]);
+  document.querySelectorAll('details').forEach(d=>{d.open=d.classList.contains('tipd')||(withAns&&!d.classList.contains('sol'));});
+  printHooks.forEach(h=>{try{h.before();}catch(e){console.error(e);}});
+  try{ if(LESSON.beforePrint) LESSON.beforePrint(PY); }catch(e){ console.error(e); }
+});
+window.addEventListener('afterprint',()=>{
+  if(!printing) return; printing=false;
+  saved.forEach(([d,o])=>d.open=o);
+  printHooks.forEach(h=>{try{h.after();}catch(e){console.error(e);}});
+  try{ if(LESSON.afterPrint) LESSON.afterPrint(PY); }catch(e){ console.error(e); }
+});
+fromHash();
+})();
+
+</script>
+</body>
+</html>
